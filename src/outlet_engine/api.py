@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import threading
 import time
 from dataclasses import dataclass, field
 from urllib.error import URLError
@@ -16,6 +17,7 @@ READ_METHODS = frozenset({
     "getInventoryWarehouses", "getInventoryProductsList", "getInventoryProductsData",
     "getInventoryProductsStock", "getInventoryDocuments", "getInventoryDocumentItems",
     "getInventoryPurchaseOrders", "getInventoryPurchaseOrderItems",
+    "getOrderExtraFields", "getOrderReturnExtraFields", "getOrderReturnStatusList",
 })
 
 
@@ -35,8 +37,11 @@ class BaseLinkerConfig:
 class BaseLinkerClient:
     endpoint = "https://api.baselinker.com/connector.php"
 
-    def __init__(self, config: BaseLinkerConfig, *, transport: str | None = None):
+    def __init__(self, config: BaseLinkerConfig, *, transport: str | None = None, request_gate=None):
         self.config = config
+        self.request_gate = request_gate
+        self.http_attempts = 0
+        self.counter_lock = threading.Lock()
         self.transport = transport or ("curl" if os.name == "nt" else "urllib")
         if self.transport not in {"curl", "urllib"}:
             raise ValueError("Nieobsługiwany transport HTTP.")
@@ -76,6 +81,10 @@ class BaseLinkerClient:
         error_code = "TRANSPORT_OR_INVALID_RESPONSE"
         for attempt in range(retries):
             try:
+                if self.request_gate:
+                    self.request_gate()
+                with self.counter_lock:
+                    self.http_attempts += 1
                 result = json.loads(self._post(body))
                 if not isinstance(result, dict):
                     raise ValueError("Invalid response")

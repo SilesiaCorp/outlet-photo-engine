@@ -81,3 +81,9 @@ py -3 scripts/outlet_queue.py --help
 Następnie jeden celowany, read-only odczyt rzeczywistego produktu/zamówienia.
 Pierwszy rzeczywisty wpis jest pilotem tylko po konkretnej zgodzie pracownika;
 nie dodawaj wiersza testowego do produkcji, aby sprawdzić instalację.
+
+## Aktualizacje na magazynie
+
+Silnik rozwijamy w kanonicznym repo. Na tym PC pobieraj nową wersję z tego
+samego adresu i ponownie odczytaj zmienione reguły w aktywnej rozmowie.
+Pełna procedura Git/ZIP i skrypt: [UPDATING.md](UPDATING.md).

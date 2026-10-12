@@ -136,5 +136,22 @@
     "worker_role": "approved_sheet_entry_and_exact_readback",
     "approval_for_sheet_entry_includes_PZ": false,
     "private_queue": true
+  },
+  "engine_version": "2.1.0",
+  "fast_search": {
+    "default_mode": "first_fresh_plausible_candidate",
+    "obvious_label_identifiers_first": true,
+    "scan_return_number_in_order_notes": true,
+    "standard_note_field_ids": [
+      "2"
+    ],
+    "emit_first_candidate_before_enrichment": true,
+    "conversation_first_call_preview_only": true,
+    "full_scan_opt_in": true,
+    "known_reference_cannot_fall_back_to_model_only": true,
+    "api_request_limit_per_minute": 100,
+    "status_metadata_max_age_seconds": 3600,
+    "field_metadata_max_age_seconds": 86400,
+    "production_reference_index_in_git": false
   }
 }

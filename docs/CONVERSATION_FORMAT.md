@@ -6,12 +6,18 @@ Rozpoznaj fakty z etykiety i stan opakowania. Jeśli pracownik mówi, że to
 wszystkie dostępne zdjęcia/dane, nie pytaj ponownie o te same informacje.
 Szukaj głębiej w systemach według OPERATING_GUIDE.md.
 
+Najpierw stosuj FAST_SEARCH.md: konkretne oznaczenia paczki, w tym numer
+zwrotu zapisany w zamówieniu Base. Pokaż pierwszego wiarygodnego kandydata
+bez czekania na pełny przegląd. Uzupełnienie finansów i pól wykonaj zaraz
+potem wyłącznie dla tej pozycji. Wstępna kandydatura jest tak oznaczona.
+
 Odpowiedź:
 
 1. **Produkt:** marka, pełny model, oryginalny EAN, widoczny stan opakowania.
-2. **Wynik:** liczba pasujących kartotek i zamówień; krótko zakres API/archiwum.
+2. **Wynik:** liczba pasujących kartotek i zamówień w sprawdzonym dotąd zakresie;
+   krótko zakres API/archiwum. Nie sugeruj kompletnego przeglądu po pierwszym trafieniu.
 3. **Kandydaci:** mała tabela `BL | SKU | data/status | dowód | wyjątek`.
-4. **Najlepszy kandydat:** numer i konkretne uzasadnienie; jawnie „roboczy”,
+4. **Pierwszy wiarygodny kandydat / obecnie proponowany:** numer i konkretne uzasadnienie; jawnie „roboczy”,
    jeśli brak dowodu przypisania sztuki. Nie wymyślaj procentów pewności.
 5. **Werdykt i dane arkusza:** dane poniżej oraz krótka lista braków.
 

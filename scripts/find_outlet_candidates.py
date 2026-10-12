@@ -7,6 +7,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 from contextlib import contextmanager
 from datetime import UTC, datetime
@@ -19,8 +20,11 @@ sys.path.insert(0, str(ROOT / "src"))
 from outlet_engine.api import BaseLinkerClient  # noqa: E402
 from outlet_engine.api import BaseLinkerConfig, require_env  # noqa: E402
 from outlet_engine.verdict import markdown_verdict, sheet_verdict  # noqa: E402
+from outlet_engine.fast_search import FastCache, FirstCandidateSearch  # noqa: E402
+from outlet_engine.rate_limit import RequestBudget  # noqa: E402
 
-READ_METHODS = {"getInventoryProductsList", "getOrderStatusList", "getOrders", "getOrderPackages", "getInvoices"}
+READ_METHODS = {"getInventoryProductsList", "getOrderStatusList", "getOrders", "getOrderPackages", "getInvoices",
+                "getOrderReturns", "getOrderExtraFields", "getOrderReturnExtraFields"}
 ORDER_FIELDS = (
     "order_id", "order_source", "order_source_id", "order_status_id", "date_add",
     "date_in_status", "confirmed", "currency", "delivery_package_module",
@@ -44,6 +48,15 @@ def model_matches(model: str, name: str) -> bool:
 
 
 def matching_reasons(product: dict, *, model: str, ean: str, skus: set[str]) -> list[str]:
+    # A known conflicting suffix is not repaired by an accidental SKU/EAN match.
+    if "/" in model:
+        family, suffix = model.rsplit("/", 1)
+        family_parts = re.findall(r"[a-z]+|[0-9]+", family, re.I)
+        family_pattern = r"[\s./_-]*".join(map(re.escape, family_parts))
+        other = re.search(r"(?<![a-z0-9])" + family_pattern + r"\s*/\s*([a-z0-9]+)",
+                          str(product.get("name") or ""), re.I)
+        if other and other[1].casefold() != suffix.strip().casefold():
+            return []
     reasons = []
     if ean and str(product.get("ean") or "").strip() == ean:
         reasons.append("EAN")
@@ -165,22 +178,54 @@ def private_root() -> Path:
     return (Path(local) if local else Path.home() / ".local" / "share") / "Codex" / "marketplace-ops"
 
 
+def evidence_text(value: str) -> str:
+    if value.startswith("return:"):
+        return "Numer zwrotu z paczki zgadza się z informacją w zamówieniu."
+    if value.startswith("native_return:"):
+        return "Rejestr zwrotów Base łączy produkt z zamówieniem."
+    return {
+        "native_return_link_requires_original_order_readback": "Rejestr zwrotu wskazuje zamówienie; jego karta wymaga odczytu.",
+        "matching_product_and_qualifying_status": "Produkt pasuje; status wskazuje zwrot lub anulowanie.",
+        "human_selected_order": "Numer BL wskazany przez pracownika; produkt pasuje.",
+        "verified_return_package": "Zamówienie ma przesyłkę zwrotną.",
+        "exact_cached_package_refreshed": "Numer przesyłki z etykiety pasuje do zamówienia.",
+        "tracking:delivery_package_nr": "Numer przesyłki zgadza się z zamówieniem w Base.",
+    }.get(value, "Oznaczenie i produkt pasują do danych Base.")
+
+
 def main() -> int:
+    started = time.monotonic()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", required=True, help="Pełny model z etykiety, np. FC8240/09")
+    parser.add_argument("--model", default="", help="Pełny model z etykiety, np. MODEL100/01")
     parser.add_argument("--ean", default="", help="Oryginalny EAN jako tekst")
     parser.add_argument("--sku", action="append", default=[], help="Potwierdzone SKU; można powtórzyć")
     parser.add_argument("--order-id", type=int, action="append", default=[],
                         help="Konkretny numer BL wskazany przez pracownika; bez skanowania wszystkich statusów")
+    parser.add_argument("--return-number", "--return-code", dest="return_number", default="",
+                        help="Pełny numer zwrotu/RMA z paczki; także numery zapisane w notatkach Base")
+    parser.add_argument("--return-id", type=int, help="Wewnętrzny ID zwrotu Base; inny niż numer zamówienia")
+    parser.add_argument("--tracking-number", default="", help="Pełny numer przesyłki z etykiety, nie telefon automatu")
+    parser.add_argument("--external-order-id", default="", help="Numer transakcji/zamówienia marketplace")
+    parser.add_argument("--exclude-order-id", type=int, action="append", default=[], help="Pomiń kandydata odrzuconego dla tej sztuki")
+    parser.add_argument("--preview-only", action="store_true", help="Natychmiastowy pierwszy kandydat i ceny z zamówienia; faktury/przesyłki w kolejnym kroku")
+    parser.add_argument("--full-scan", action="store_true", help="Porównaj wszystkich kandydatów po modelu/SKU/EAN; wolniejszy pełny tryb")
+    parser.add_argument("--deep", action="store_true", help="Rozszerz szukanie konkretnego numeru na wszystkie bieżące statusy")
     parser.add_argument("--condition-note", help="Potwierdzona obserwacja ze zdjęcia lub od pracownika")
     parser.add_argument("--refresh", action="store_true", help="Odśwież aktualne statusy zamiast cache")
     parser.add_argument("--cache-dir", type=Path, default=private_root() / "outlet-discovery")
-    parser.add_argument("--format", choices=["json", "markdown"], default="markdown")
+    parser.add_argument("--format", choices=["json", "jsonl", "markdown"], default="markdown")
     args = parser.parse_args()
-    if not re.findall(r"[a-z0-9]", args.model.casefold()):
-        parser.error("Model nie może być pusty.")
+    if not any([args.model.strip(), args.ean.strip(), args.sku, args.order_id, args.return_number.strip(),
+                args.return_id is not None, args.tracking_number.strip(), args.external_order_id.strip()]):
+        parser.error("Podaj odczytany model, EAN/SKU albo konkretne oznaczenie zamówienia/zwrotu/przesyłki.")
+    if args.model and not re.findall(r"[a-z0-9]", args.model.casefold()):
+        parser.error("Model nie zawiera czytelnego oznaczenia.")
     if any(order_id <= 0 for order_id in args.order_id):
         parser.error("Numer BL musi być dodatni.")
+    if args.return_id is not None and args.return_id <= 0:
+        parser.error("ID zwrotu Base musi być dodatni.")
+    if args.full_scan and any([args.return_number, args.return_id, args.tracking_number, args.external_order_id, args.preview_only, args.deep]):
+        parser.error("Dla konkretnego oznaczenia użyj trybu pierwszego kandydata; --deep rozszerza jego zakres.")
     config = json.loads((ROOT / "configs" / "outlet-intake.json").read_text(encoding="utf-8"))
     token = require_env("BASELINKER_TOKEN")
     # Separate cache namespaces across Base tokens without persisting the token.
@@ -193,21 +238,78 @@ def main() -> int:
     else:
         raise RuntimeError("Cache produkcyjny musi pozostać poza repozytorium.")
     cache_dir.mkdir(parents=True, exist_ok=True)
-    client = BaseLinkerClient(BaseLinkerConfig(token=token, inventory_id=config["base_inventory_id"]))
+    budget = RequestBudget(args.cache_dir.resolve() / "api-budget.sqlite3", account_key)
+    client = BaseLinkerClient(BaseLinkerConfig(token=token, inventory_id=config["base_inventory_id"]), request_gate=budget.acquire)
     calls = 0
+    read_count_lock = threading.Lock()
     last_call = 0.0
 
     def read(method: str, parameters: dict) -> dict:
         nonlocal calls, last_call
         if method not in READ_METHODS:
             raise ValueError("Niedozwolona metoda w narzędziu read-only.")
-        time.sleep(max(0, .7 - (time.monotonic() - last_call)))
-        calls += 1
+        if args.full_scan:
+            time.sleep(max(0, .7 - (time.monotonic() - last_call)))
+        with read_count_lock:
+            calls += 1
         last_call = time.monotonic()
         return client.call(method, parameters)
 
     fragments = config["search_status_fragments"]
     index_path = cache_dir / "orders-current.json"
+    if not args.full_scan:
+        with exclusive_cache(cache_dir / "discovery.lock"):
+            fast_cache = FastCache(cache_dir / "fast-cache.sqlite3")
+            try:
+                if args.refresh:
+                    fast_cache.db.execute("DELETE FROM metadata")
+                    fast_cache.db.commit()
+                else:
+                    fast_cache.import_legacy(index_path, account_key, sanitize_order)
+
+                def preview(event):
+                    event["created_at"] = datetime.now(UTC).isoformat()
+                    event["http_attempts"] = getattr(client, "http_attempts", calls)
+                    atomic_json(cache_dir / "first-candidate.json", event)
+                    if args.format == "jsonl":
+                        print(json.dumps(event, ensure_ascii=False), flush=True)
+                    elif args.format == "markdown":
+                        print(f"- Pierwszy wiarygodny kandydat: **BL {event['order_id']}**, SKU **{event['product'].get('sku') or 'brak'}**.", flush=True)
+                        print(f"- Dowód: {evidence_text(event['evidence'])} Sztuka do potwierdzenia.", flush=True)
+
+                engine = FirstCandidateSearch(read, fast_cache,
+                    matches=lambda p, skus: matching_reasons(p, model=args.model, ean=args.ean, skus=skus),
+                    sanitize=sanitize_order, qualifying=lambda name: qualifying_status(name, fragments),
+                    config=config, model=args.model, ean=args.ean, skus=args.sku, order_ids=args.order_id,
+                    return_number=args.return_number, return_id=args.return_id, tracking_number=args.tracking_number,
+                    external_order_id=args.external_order_id, excluded_order_ids=args.exclude_order_id,
+                    deep=args.deep, on_candidate=preview, preview_only=args.preview_only,
+                    condition_note=args.condition_note, started_at=started)
+                result = engine.run()
+                result["scope"]["http_attempts"] = getattr(client, "http_attempts", calls)
+                atomic_json(cache_dir / "latest-result.json", result)
+            finally:
+                fast_cache.close()
+        if args.format == "json":
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+        elif args.format == "jsonl":
+            print(json.dumps({"event": "result", **result}, ensure_ascii=False), flush=True)
+        else:
+            if result["candidates"]:
+                row = result["candidates"][0]
+                print(f"- Status: {row['status_name']}.")
+                if row.get("order_readback_complete"):
+                    print(f"- Ilość: {row['product'].get('quantity')} wg zamówienia; fizyczna do potwierdzenia.")
+                elif row.get("native_return"):
+                    print(f"- Ilość w rejestrze zwrotu: {row['native_return'].get('selected_item_quantity')}; fizyczna do potwierdzenia.")
+                print(markdown_verdict(row["verdict"]))
+                if not result["scope"]["candidate_enrichment_complete"]:
+                    print("- Wstępny kandydat: faktury/przesyłki i pełna kwalifikacja wymagają dalszego odczytu.")
+            else:
+                print("- Brak potwierdzonego kandydata w sprawdzonym zakresie. Następny krok: dokładny numer w notatkach Base i archiwum.")
+            print("- Zakres: pierwszy wiarygodny wynik; pełne porównanie i archiwum nie zostały wykonane.")
+            print(f"- API: {calls} żądań; pierwszy kandydat po {result['scope']['time_to_first_candidate_seconds']} s.")
+        return 0
     with exclusive_cache(cache_dir / "discovery.lock"):
         specified_orders = {}
         if args.order_id:
@@ -237,7 +339,7 @@ def main() -> int:
                 atomic_json(index_path, index)
 
         catalog: dict[str, dict] = {}
-        queries = [{"filter_name": args.model.split("/")[0].strip()}]
+        queries = [{"filter_name": args.model.split("/")[0].strip()}] if args.model else []
         if args.ean:
             queries.insert(0, {"filter_ean": args.ean})
         for sku in args.sku:
@@ -262,6 +364,8 @@ def main() -> int:
         # Refresh just the candidate orders; cached statuses are search hints, not proof.
         confirmed = []
         for order_id in sorted({c["order_id"] for c in found}):
+            if order_id in args.exclude_order_id:
+                continue
             orders = [specified_orders[order_id]] if order_id in specified_orders else read("getOrders", {
                 "order_id": order_id, "get_unconfirmed_orders": True,
                 "include_custom_extra_fields": True}).get("orders")

@@ -1,22 +1,37 @@
-# Weryfikacja silnika 2.0.0
+# Weryfikacja silnika 2.1.0
 
 Weryfikacja wykonana 12.10.2026. Repo zawiera niezależną historię samego
 silnika, bez historii wcześniejszego projektu Marketplace i prywatnych przypadków.
 
 ## Sprawdzone
 
-- **53 testy** na danych umownych: dopasowanie modelu/wariantu i EAN/SKU,
+- **84 testy** na danych umownych: dopasowanie modelu/wariantu i EAN/SKU,
   paginacja i cache, oznaczenie zakresu archiwum, wskazany BL bez skanu statusów,
   ceny vNN netto, historyczne brutto, alokacja, VAT/waluty/spółki, brak danych,
   dowód zgody, prywatna kolejka i jeden writer.
+- Szybki tryb: pierwszy wynik bez kolejnej strony/statusu, cache z aktualnym
+  odczytem, RMA w Notatkach i nazwanych polach, zachowane zera, powiązana pozycja
+  zwrotu, konflikty oznaczeń, pominięcie odrzuconego BL, zdarzenie przed
+  uzupełnieniem finansów i zachowanie kandydatury przy błędzie tego odczytu.
+- Wspólny lokalny budżet API, bez stałego opóźnienia przy wolnym limicie;
+  aktualizator dopuszcza kanoniczny origin i blokuje aktywny/niepewny wpis.
 - Plan OUTLET i REKLAMACJE, w tym rekord KLIENT bez przyjęcia własnego stanu:
   rodzime wartości, daty, percent 0.23, tekstowe identyfikatory z zerami,
   checkbox FALSE, brak fikcyjnego PZ, zachowane formuły/notatki/formaty/walidacje.
 - Wykrycie zmiany preimage, błędnego wyniku, niepoprawnego konta, niespójnej
   wyceny, błędnej listy wyboru, duplikatu i wcześniejszego przyjęcia.
 - Rzeczywisty odczyt Base przez samodzielny adapter tego repo; celowany wariant
-  wymagał 6 żądań, zwrócił pełny werdykt 22 pól i poprawną podstawę cen zakupu.
+  w wersji 2.1 wymagał **3 żądań**, zwrócił pełny werdykt 22 pól, poprawną
+  podstawę cen zakupu i właściciela z dokumentu. Zdarzenie pierwszego kandydata
+  pojawiło się po **0.20 s**, przed odczytem faktur/przesyłek; całość po 0.44 s.
   Raport rzeczywistego przypadku pozostaje prywatny.
+- Rzeczywisty podgląd po modelu z istniejącym cache: **0.59 s / 2 żądania**.
+  Podgląd powiązania RMA: **0.23 s / 1 żądanie**, z jawnym brakiem odczytu
+  oryginalnej karty i ceny. Są to pomiary konkretnych prób, nie gwarancja czasu.
+- Rzeczywiste metadane Base potwierdziły standardowe pole **2 — Notatki**.
+  Dopasowanie numeru wpisanego w notatkę/pole jest sprawdzone testami umownymi;
+  nie deklarujemy produkcyjnego trafienia po notatce na podstawie samego odczytu
+  definicji pól. Rejestr RMA i jego powiązanie odczytano w rzeczywistym API.
 - Rzeczywiste metadane i rodzime komórki firmowego arkusza: parser odpowiedzi
   konektora rozpoznał 22 kolumny OUTLET, format VAT i walidacje. Odczytano
   wszystkie 136 wierszy instrukcji, sekcje 01–12 i kolejkę A–AB.

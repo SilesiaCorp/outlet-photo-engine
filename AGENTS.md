@@ -15,13 +15,28 @@
 
 - Preferuj API, celowany odczyt i prywatny cache. Skrypt
   scripts/find_outlet_candidates.py obsługuje szybkie odczyty.
+- Priorytetem jest czas do pierwszego wiarygodnego kandydata. Najpierw odczytaj
+  oczywiste oznaczenia paczki: numer zwrotu/RMA, pełny numer przesyłki, BL lub
+  numer transakcji; dopiero potem szukaj po modelu/EAN/SKU. Stosuj
+  docs/FAST_SEARCH.md i domyślny tryb pierwszego kandydata.
+- Numery zwrotów bywają zapisane w samych zamówieniach Base: Notatki,
+  extra_field_2, admin_comments i pola dodatkowe. Sprawdzaj je także wtedy,
+  gdy rejestr getOrderReturns nie daje wyniku. Nie wymyślaj filtra API po notatce.
+- Pierwszego świeżo sprawdzonego, prawdopodobnego kandydata pokaż natychmiast,
+  bez czekania na pełny indeks, wszystkie kartoteki lub globalny ranking.
+  Po wstępnym wyniku uzupełnij dane wyłącznie tego kandydata; nie nazywaj go
+  najlepszym spośród wszystkich, jeśli nie sprawdzono reszty.
+- Dla pierwszej odpowiedzi użyj --preview-only albo obsłuż candidate_found
+  z --format jsonl od razu. Wstępny wynik nie potwierdza fizycznej sztuki.
+  Po odrzuceniu stosuj --exclude-order-id i szukaj kolejnego.
 - Dla trudnego towaru przejdź po sprawdzalnych tropach: wariant, stare SKU,
   techniczny EAN, pozycja, etykieta/przesyłka, zwrot, korekta, zakup, transfer,
   archiwum i wcześniejszy rejestr. Puste bieżące API nie dowodzi braku w archiwum.
 - Model jest identyfikacją produktu; status, karton i ranking nie identyfikują
   konkretnej sztuki ani jej stanu. Nie dopisuj „sprawny” lub „kompletny” bez dowodu.
-- Pisz krótko po polsku. Pokaż wyniki, potencjalnych kandydatów i najlepszego
-  kandydata z uzasadnieniem. Każdy werdykt zawiera firmę/dostawcę zakupu,
+- Pisz krótko po polsku. Pokaż wyniki i obecnie proponowanego kandydata
+  z uzasadnieniem; dodatkowych kandydatów po odrzuceniu lub na życzenie.
+  Każdy pełny werdykt zawiera firmę/dostawcę zakupu,
   sprzedawcę, konto zakupowe, kupującą spółkę, netto, brutto, VAT, walutę,
   ilość oraz wszystkie bieżące pola arkusza i źródła/braki.
 - `N: kwota vNN` oznacza N sztuk po kwocie NETTO PLN z VAT NN.

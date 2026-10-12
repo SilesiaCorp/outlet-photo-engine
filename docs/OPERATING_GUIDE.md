@@ -1,6 +1,6 @@
 # Serwis / Reklamacje — silnik identyfikacji i dodawania do outletu
 
-Wersja 2.0, zweryfikowana 12.10.2026. Właściciel procesu: pracownik
+Wersja 2.1, zweryfikowana 12.10.2026. Właściciel procesu: pracownik
 Serwis / Reklamacje i jego Codex. Zakres: identyfikacja fizycznego towaru,
 odnalezienie zamówienia, przygotowanie rejestru, autoryzowane przyjęcie
 i kontrola wyniku. Wystawienie oferty, refundacja, naprawa dokumentów,
@@ -103,19 +103,25 @@ Kolejność: lokalny snapshot produktu → lokalny indeks pozycji zamówień →
 celowany odczyt API. Jeśli danych lokalnych brak lub są stare, nie pobieraj
 ponownie całego katalogu. Lista po EAN, modelu lub SKU zwykle wystarczy.
 
-## 4. Szybkie wyszukiwanie API i cache
+## 4. Pierwszy kandydat, API i cache
+
+Domyślnie stosuj [FAST_SEARCH.md](FAST_SEARCH.md): oznaczenia paczki i numery
+zwrotów w zamówieniach mają pierwszeństwo. Po pierwszym wiarygodnym wyniku
+od razu pokaż kandydaturę i uzupełnij tylko tę pozycję. Nie czekaj na pełny
+indeks, wszystkie kartoteki lub globalny ranking. Stary pełny tryb poniżej
+wybieramy jawnie przez `--full-scan`.
 
 Narzędzie `scripts/find_outlet_candidates.py` wykonuje tylko odczyty Base.
-Przykład dla modelu rozpoznanego ze zdjęć:
+Przykład pierwszego kandydata dla modelu rozpoznanego ze zdjęć:
 
 ```powershell
-py -3 scripts/find_outlet_candidates.py --model MODEL-100/01 --ean EAN_Z_ETYKIETY
+py -3 scripts/find_outlet_candidates.py --model MODEL-100/01 --ean EAN_Z_ETYKIETY --preview-only
 ```
 
-Wymuszenie świeżego indeksu:
+Pełne porównanie z wymuszeniem świeżego indeksu:
 
 ```powershell
-py -3 scripts/find_outlet_candidates.py --model MODEL-100/01 --ean EAN_Z_ETYKIETY --refresh
+py -3 scripts/find_outlet_candidates.py --model MODEL-100/01 --ean EAN_Z_ETYKIETY --full-scan --refresh
 ```
 
 Potwierdzone SKU można dopisać przez powtarzalny `--sku`. `--format json`
@@ -129,7 +135,7 @@ status „Wysłane” nie odrzuca jawnie wskazanej pozycji. Nadal wymaga ona
 powiązania z produktem i fizyczną sztuką. Brak ID w bieżącym API oznacza
 wyjątek do sprawdzenia w archiwum, nie dowód nieistnienia zamówienia.
 
-Narzędzie:
+Pełny tryb `--full-scan`:
 
 1. Używa świeżego indeksu do godziny albo odczytuje bieżące statusy po
    fragmentach `zwrot`, `zwr`, `anul`, `reklam`, `serwis`. `anul` obejmuje
@@ -500,7 +506,10 @@ i skutek uśpienia/restartu. Supervisor ma mutex, bezpieczny log i checkpoint.
 
 ## 14. Krótki, czytelny wynik dla pracownika
 
-Raport wyszukiwania ma mieścić się w kilku punktach i małej tabeli:
+Pierwszą kandydaturę pokaż natychmiast według FAST_SEARCH.md. Pełny werdykt
+uzupełnij następnie dla tej pozycji. Nie nazywaj pierwszego wyniku globalnie
+najlepszym, gdy reszta nie była sprawdzana. Raport ma mieścić się w kilku
+punktach i małej tabeli:
 
 1. **Produkt:** marka, pełny model, EAN z etykiety; obserwacja stanu.
 2. **Kandydaci:** BL, SKU, data, status, najważniejszy dowód, duplikat/wyjątek.
