@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "scope": "sheet_entry",
+  "entry_mode": "complete",
+  "operation_id": "00000000-0000-4000-8000-000000000001",
+  "physical_receipt_id": "RECEIPT-DEMO-001",
+  "destination": {
+    "spreadsheet_id": "SET_LOCAL_REAL_SHEET_ID",
+    "sheet_title": "OUTLET",
+    "account_email": "dsi.silesiaprotech@gmail.com"
+  },
+  "identity": {
+    "order_id": "00017",
+    "sku": "000-DEMO",
+    "product_id": 17,
+    "order_product_id": 1701
+  },
+  "verified": {
+    "order_product_binding": false,
+    "physical_quantity": false,
+    "receipt_date": false,
+    "condition": false,
+    "intake_value": false,
+    "ownership": false
+  },
+  "currency": "PLN",
+  "unit": "szt",
+  "fields": {
+    "Nazwa": "Produkt umowny MODEL-100/01",
+    "SKU": "000-DEMO",
+    "Zamówienie BL": "00017",
+    "Cena brutto": "123.00",
+    "VAT": "23",
+    "Ilość": 1,
+    "Dodane do systemu magazynowego": false,
+    "Nr PZ system magazynowy": null,
+    "Notatka": "Opakowanie uszkodzone. Urządzenia nie testowano.",
+    "EAN Oryg.": "0123456789012",
+    "Cena Netto": "100.00",
+    "Data zamówienia": "2026-09-10",
+    "Data przyjęcia": "2026-10-10",
+    "Własność Spółki": "TRACER TEAM",
+    "Konto Allegro": "Konto-demo",
+    "Kupujący": "SILESIA PROTECH",
+    "Notatka AI": "Źródło wyceny: dokument demonstracyjny."
+  },
+  "pending": [
+    "Przyklad zawiera dane umowne; nie jest upowaznieniem do zapisu."
+  ],
+  "evidence": {
+    "price_source": "Dokument umowny",
+    "condition_source": "Pracownik: nie testowano"
+  },
+  "approval": {
+    "origin": "human_user",
+    "approved": false,
+    "message": "",
+    "parent_thread_id": "",
+    "recorded_at": "",
+    "proposal_sha256": ""
+  }
+}

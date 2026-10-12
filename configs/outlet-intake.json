@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "workflow": "serwis-reklamacje-outlet",
+  "verified_on": "2026-10-12",
+  "google_account_email": "dsi.silesiaprotech@gmail.com",
+  "tabs": {
+    "instruction": {
+      "title": "INSTRUKCJA MAGAZYNU"
+    },
+    "outlet": {
+      "title": "OUTLET"
+    },
+    "complaints": {
+      "title": "REKLAMACJE"
+    },
+    "queue": {
+      "title": "STANOWE DODAJ DO SM"
+    }
+  },
+  "base_inventory_id": 17463,
+  "destinations": {
+    "sp": {
+      "outlet": {
+        "inventory_id": 18712,
+        "warehouse_id": 25816,
+        "name": "M2 SP - Outlet"
+      },
+      "complaints": {
+        "inventory_id": 18713,
+        "warehouse_id": 25817,
+        "name": "M3 SP - Reklamacje"
+      },
+      "stateful_source": {
+        "inventory_id": 18711,
+        "warehouse_id": 25815,
+        "name": "M1 SP - Stanowe"
+      }
+    },
+    "tt": {
+      "outlet": {
+        "inventory_id": 18716,
+        "warehouse_id": 25820,
+        "name": "M2 TT - Outlet"
+      },
+      "complaints": {
+        "inventory_id": 18717,
+        "warehouse_id": 25821,
+        "name": "M3 TT - Reklamacje"
+      },
+      "stateful_source": {
+        "inventory_id": 18715,
+        "warehouse_id": 25819,
+        "name": "M1 TT - Stanowe"
+      }
+    }
+  },
+  "import_headers": [
+    "sku",
+    "akcja",
+    "firma",
+    "typ_produktu",
+    "cena_netto",
+    "ilosc",
+    "zamowienie",
+    "magazyn_zrodlowy",
+    "magazyn_docelowy",
+    "opis",
+    "dokument"
+  ],
+  "intake_actions": [
+    "zwrot",
+    "reklamacja",
+    "zwrot_allegro"
+  ],
+  "price_basis": "approved_current_source_unit_net_price_PLN_without_additional_markup",
+  "allow_verified_zero_price": true,
+  "verdict": {
+    "include_purchase_supplier_and_seller": true,
+    "include_purchase_account_and_buyer_company": true,
+    "include_unit_net_gross_vat_currency_quantity": true,
+    "include_all_current_sheet_columns_and_pending_fields": true,
+    "base_purchase_fields": {
+      "price": "41787",
+      "seller": "42651",
+      "buyer": "45809"
+    },
+    "purchase_price_currency": "PLN",
+    "explicit_vNN_price_basis": "unit_net",
+    "purchase_prefix_N_colon_means": "quantity_not_line_position",
+    "unmarked_legacy_price": "gross; derive_net_only_with_verified_purchase_VAT",
+    "source_purchase_price_is_approved_intake_value": false
+  },
+  "warehouse_document_types": {
+    "PZ": 0,
+    "PW": 1,
+    "MM": 4,
+    "BO": 5
+  },
+  "search_cache_max_age_seconds": 3600,
+  "search_status_fragments": [
+    "zwrot",
+    "zwr",
+    "anul",
+    "reklam",
+    "serwis"
+  ],
+  "sheet_instruction_observation": {
+    "range": "'INSTRUKCJA MAGAZYNU'!A1:L180",
+    "nonempty_rows_returned": 136,
+    "latest_section": "12. PANEL MAGAZYNOWY — BEZ KOPIOWANIA",
+    "raw_readback_file_sha256": "b154eb361ff558c0ffbbab9fb9c54ee061a1b0bc5180825a9cf6038707761c7e",
+    "raw_readback_location": "private_local_checkpoint_only",
+    "normalized_values_sha256": "251bb6a14172f3f3c85a3e7335b55296ab02352af49866c3725595a29df8b9d7"
+  },
+  "safety": {
+    "config_is_authorization": false,
+    "photo_model_is_unit_identity": false,
+    "status_is_physical_receipt": false,
+    "customer_owned_goods_may_enter_company_stock": false,
+    "require_current_sheet_instruction_and_metadata": true,
+    "require_live_destinations_before_mutation": true,
+    "require_approved_intake_manifest": true,
+    "require_confirmed_document_and_exact_items_readback": true,
+    "api_discovery_includes_archive": false,
+    "production_data_in_git": false
+  },
+  "spreadsheet": {
+    "id_env": "OUTLET_SPREADSHEET_ID",
+    "title": "SYSTEM REKLAMACJI I OUTLETU — SP / TT",
+    "legacy_id_env": "OUTLET_LEGACY_SPREADSHEET_ID"
+  },
+  "delegation": {
+    "on_human_approval": "dedicated_local_codex_thread",
+    "one_sheet_writer": true,
+    "main_thread_role": "search_and_review",
+    "worker_role": "approved_sheet_entry_and_exact_readback",
+    "approval_for_sheet_entry_includes_PZ": false,
+    "private_queue": true
+  }
+}

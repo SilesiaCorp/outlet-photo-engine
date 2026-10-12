@@ -1,0 +1,2232 @@
+{
+  "schema_version": 1,
+  "observed_on": "2026-10-12",
+  "source": "native metadata; structure only, no production row values",
+  "sheets": {
+    "REKLAMACJE": {
+      "headers": [
+        "Rozwiązane - wydano",
+        "Dodane do systemu magazynowego",
+        "Nr PZ system magazynowy",
+        "ID",
+        "Nazwa",
+        "EAN Oryginalny",
+        "SKU",
+        "Cena netto",
+        "Cena brutto",
+        "Ilość",
+        "VAT",
+        "Zamówienie BL",
+        "Data",
+        "Data otrzymania",
+        "Informacja",
+        "Status",
+        "Sprzedawca",
+        "Właściciel towaru",
+        "Notatka"
+      ],
+      "template": [
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "BOOLEAN"
+            }
+          },
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "BOOLEAN"
+            }
+          },
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 8,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "LEFT",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "CURRENCY",
+              "pattern": "#,##0.00\\ [$zł-415]"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "CURRENCY",
+              "pattern": "#,##0.00\\ [$zł-415]"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "PERCENT",
+              "pattern": "0%"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "DATE",
+              "pattern": "yyyy-MM-dd"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "DATE",
+              "pattern": "yyyy-MM-dd"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "Odrzucona, czeka na 10 EUR"
+                },
+                {
+                  "userEnteredValue": "Po naprawie na outlet"
+                },
+                {
+                  "userEnteredValue": "OUTLET przeczyścić/paczka"
+                },
+                {
+                  "userEnteredValue": "INNE - komentarz"
+                }
+              ]
+            },
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "Towar czeka na reklamację"
+                },
+                {
+                  "userEnteredValue": "Wysłany na serwis"
+                },
+                {
+                  "userEnteredValue": "Towar po reklamacji u nas"
+                },
+                {
+                  "userEnteredValue": "Czeka na odbiór klienta"
+                },
+                {
+                  "userEnteredValue": "Czeka na przeczyszczenie"
+                }
+              ]
+            },
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "SILESIA PROTECH"
+                },
+                {
+                  "userEnteredValue": "TRACER TEAM"
+                }
+              ]
+            },
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "MY"
+                },
+                {
+                  "userEnteredValue": "KLIENT"
+                }
+              ]
+            },
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "OUTLET": {
+      "headers": [
+        "Sprzedano",
+        "Dodane do systemu magazynowego",
+        "Nr PZ system magazynowy",
+        "lk",
+        "Nazwa",
+        "EAN Oryg.",
+        "SKU",
+        "Cena Netto",
+        "Cena brutto",
+        "VAT",
+        "Ilość",
+        "Zamówienie BL",
+        "Data zamówienia",
+        "Data przyjęcia",
+        "Dokument korygujący",
+        "Zamówienie zakupowe",
+        "Konto Allegro",
+        "Kupujący",
+        "Własność Spółki",
+        "Wystawione",
+        "Notatka",
+        "Notatka AI"
+      ],
+      "template": [
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "BOOLEAN"
+            }
+          },
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "CURRENCY",
+              "pattern": "#,##0.00\\ [$zł-415]"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "BOOLEAN"
+            }
+          },
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "BOOLEAN"
+            }
+          },
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "LEFT",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "CURRENCY",
+              "pattern": "#,##0.00\\ [$zł-415]"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "CURRENCY",
+              "pattern": "#,##0.00\\ [$zł-415]"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "PERCENT",
+              "pattern": "0%"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "DATE",
+              "pattern": "yyyy-MM-dd"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "CLIP",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "hyperlinkDisplayType": "LINKED",
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "DATE",
+              "pattern": "yyyy-MM-dd"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "DATE",
+              "pattern": "yyyy-MM-dd"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "CLIP",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              },
+              "link": {
+                "uri": "https://allegro.pl/moje-allegro/zakupy/kupione/4cbbc137-afdb-3aba-8f95-6262c20a3251"
+              }
+            },
+            "hyperlinkDisplayType": "LINKED",
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "CLIP",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "hyperlinkDisplayType": "LINKED",
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "CLIP",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "hyperlinkDisplayType": "LINKED",
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "SILESIA PROTECH"
+                },
+                {
+                  "userEnteredValue": "TRACER TEAM"
+                }
+              ]
+            },
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "TAK"
+                },
+                {
+                  "userEnteredValue": "NIE"
+                }
+              ]
+            },
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 1
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "CLIP",
+            "textFormat": {
+              "foregroundColor": {
+                "red": 0.09803922,
+                "green": 0.1254902,
+                "blue": 0.15294118
+              },
+              "fontFamily": "Lexend",
+              "fontSize": 11,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.09803922,
+                  "green": 0.1254902,
+                  "blue": 0.15294118
+                }
+              }
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 1,
+                "green": 1,
+                "blue": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "STANOWE DODAJ DO SM": {
+      "headers": [
+        "sku",
+        "akcja",
+        "firma",
+        "typ_produktu",
+        "cena_netto",
+        "ilosc",
+        "zamowienie",
+        "magazyn_zrodlowy",
+        "magazyn_docelowy",
+        "opis",
+        "dokument",
+        "Własność — nie kopiuj",
+        "Kontrola — automat",
+        "Nr PZ w BL",
+        "Źródło / ID wiersza",
+        "Uwagi / błąd",
+        "ID operacji HTML",
+        "Status SM",
+        "Data operacji SM",
+        "ID produktu BL",
+        "ID PZ w BL",
+        "ID wpisu SM",
+        "Dane wysyłki SM — automat",
+        "Wynik SM — automat",
+        "Zestaw — ID nadrzędny",
+        "Zestaw — dane automatyczne",
+        "Data przyjęcia SM",
+        "Stan produktu SM"
+      ],
+      "template": [
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "zwrot"
+                },
+                {
+                  "userEnteredValue": "reklamacja"
+                },
+                {
+                  "userEnteredValue": "zwrot_allegro"
+                }
+              ]
+            },
+            "inputMessage": "Przyjęcie: zwrot, reklamacja lub zwrot_allegro. Pozostałe operacje wykonuj w formularzu HTML.",
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "sp"
+                },
+                {
+                  "userEnteredValue": "tt"
+                }
+              ]
+            },
+            "inputMessage": "sp = Silesia Protech; tt = Tracer Team. Potwierdź faktyczną spółkę właściciela produktu.",
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "stanowy"
+                },
+                {
+                  "userEnteredValue": "niestanowy"
+                }
+              ]
+            },
+            "inputMessage": "niestanowy: katalog bazowy; stanowy: M1 właściwej spółki. Zwrot Allegro wymaga niestanowy.",
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "NUMBER_GREATER_THAN_EQ",
+              "values": [
+                {
+                  "userEnteredValue": "0"
+                }
+              ]
+            },
+            "inputMessage": "Cena jednostkowa netto w PLN, bez dodatkowego +3%, waluty i separatorów tysięcy. Zero jest poprawne.",
+            "strict": true
+          },
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "NUMBER",
+              "pattern": "0.00########"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "NUMBER_GREATER",
+              "values": [
+                {
+                  "userEnteredValue": "0"
+                }
+              ]
+            },
+            "inputMessage": "Ilość większa od zera; wpisz liczbę, bez jednostek ani separatorów tysięcy. Każdy element zestawu ma własny wiersz.",
+            "strict": true
+          },
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "CUSTOM_FORMULA",
+              "values": [
+                {
+                  "userEnteredValue": "=H2=\"\""
+                }
+              ]
+            },
+            "inputMessage": "Przy zwrocie, reklamacji i zwrocie Allegro magazyn źródłowy wynika z typu produktu. Pozostaw to pole puste.",
+            "strict": true
+          },
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 0.9529412,
+              "green": 0.9529412,
+              "blue": 0.9529412
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            },
+            "backgroundColorStyle": {
+              "rgbColor": {
+                "red": 0.9529412,
+                "green": 0.9529412,
+                "blue": 0.9529412
+              }
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "M0"
+                },
+                {
+                  "userEnteredValue": "M1"
+                },
+                {
+                  "userEnteredValue": "M2"
+                },
+                {
+                  "userEnteredValue": "M3"
+                }
+              ]
+            },
+            "inputMessage": "M2 = outlet, M3 = reklamacje. Dla zwrotu i reklamacji pole H pozostaw puste; w I jawnie wskaż cel. Spółkę ustala C.",
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "nowy"
+                },
+                {
+                  "userEnteredValue": "szkic"
+                },
+                {
+                  "userEnteredValue": "brak"
+                }
+              ]
+            },
+            "inputMessage": "nowy = utwórz i potwierdź PZ; szkic = bez potwierdzenia. brak wymaga osobnego uzgodnienia i nie oznacza przyjęcia bez skutków magazynowych.",
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "MY"
+                },
+                {
+                  "userEnteredValue": "KLIENT"
+                }
+              ]
+            },
+            "inputMessage": "Kolumna pomocnicza — nie kopiuj do HTML. Zweryfikuj własność w źródłowej reklamacji. KLIENT: blokada, bez dodawania do sesji.",
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "DATE_TIME",
+              "pattern": "yyyy-mm-dd hh:mm:ss"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT",
+              "pattern": "@"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT",
+              "pattern": "@"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT",
+              "pattern": "@"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT",
+              "pattern": "@"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT",
+              "pattern": "@"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT",
+              "pattern": "@"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "TEXT",
+              "pattern": "@"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "DATE_IS_VALID"
+            },
+            "strict": true
+          },
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "DATE",
+              "pattern": "yyyy-mm-dd"
+            },
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        },
+        {
+          "dataValidation": {
+            "condition": {
+              "type": "ONE_OF_LIST",
+              "values": [
+                {
+                  "userEnteredValue": "nowy"
+                },
+                {
+                  "userEnteredValue": "powystawowy"
+                },
+                {
+                  "userEnteredValue": "oczekuje"
+                },
+                {
+                  "userEnteredValue": "outlet"
+                }
+              ]
+            },
+            "strict": true,
+            "showCustomUi": true
+          },
+          "userEnteredFormat": {
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+              "fontFamily": "Lexend",
+              "fontSize": 11
+            }
+          }
+        }
+      ]
+    }
+  }
+}
