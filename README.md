@@ -7,9 +7,10 @@ Główna rozmowa może w tym czasie szukać kolejnego produktu.
 
 **Publiczny link do skopiowania:** https://github.com/SilesiaCorp/outlet-photo-engine
 
-**Aktualizacja 2.1.0:** pierwszeństwo mają oznaczenia paczki i numery zwrotów
-zapisane w zamówieniach Base. Pierwszego wiarygodnego kandydata pokazujemy
-od razu. [Szybkie wyszukiwanie](docs/FAST_SEARCH.md) · [aktualizacja na magazynie](docs/UPDATING.md).
+**Aktualizacja 2.2.0:** szybka propozycja najlepszego kandydata dotąd, potem
+dalsze porównanie Base i archiwum. Numery zwrotów są pomocniczym tropem.
+Przejście do kolejnego produktu potwierdza poprzednie dopasowanie.
+[Szybkie wyszukiwanie](docs/FAST_SEARCH.md) · [aktualizacja na magazynie](docs/UPDATING.md).
 
 ## Start na firmowym komputerze
 
@@ -27,9 +28,12 @@ od razu. [Szybkie wyszukiwanie](docs/FAST_SEARCH.md) · [aktualizacja na magazyn
    > docs/DELEGATION.md i docs/SHEET_ENTRY.md. Rozpoznaj produkt ze zdjęć
    > i wyszukaj jego zamówienie w Base, w tym w archiwum, jeśli potrzeba.
    > Preferuj API i cache.
-   > Najpierw sprawdź numer zwrotu/przesyłki i inne konkretne oznaczenia paczki.
-   > Pokaż pierwszego wiarygodnego kandydata od razu, bez pełnego przeglądu.
-   > Następnie uzupełnij dane wyłącznie tej pozycji. Podaj siłę dowodów,
+   > Sprawdzaj niezależne tropy równolegle; numery zwrotów są pomocnicze,
+   > mogą być błędne i nie blokują dopasowania po produkcie. Na początku
+   > pokaż najlepszego kandydata dotąd i kontynuuj sprawdzanie Base i archiwum.
+   > Gdy przerwę poszukiwania lub przejdę do kolejnego produktu, przyjmij
+   > ostatnio pokazane dopasowanie jako potwierdzone i przejdź dalej.
+   > Uzupełnij dane proponowanej pozycji. Podaj siłę dowodów,
    > firmę zakupu, konto zakupowe, kupującą spółkę, cenę netto,
    > brutto, VAT i komplet pól arkusza. Po moim zatwierdzeniu konkretnego
    > wpisu utwórz osobną lokalną rozmowę do arkusza i przekazuj jej następne
@@ -47,7 +51,7 @@ od razu. [Szybkie wyszukiwanie](docs/FAST_SEARCH.md) · [aktualizacja na magazyn
 | --- | --- |
 | [Silnik operacyjny](docs/OPERATING_GUIDE.md) | Identyfikacja po zdjęciu, API, cache, archiwum, trudne tropy, własność, wycena, zestawy i odzyskanie wyniku. |
 | [Format konwersacji](docs/CONVERSATION_FORMAT.md) | Krótka lista wyników, kandydaci, najlepszy kandydat i pełne dane finansowe/pola arkusza. |
-| [Pierwszy kandydat](docs/FAST_SEARCH.md) | Oznaczenia paczki, numery zwrotów w notatkach Base, cache i natychmiastowy wynik. |
+| [Szybki kandydat i dalsza weryfikacja](docs/FAST_SEARCH.md) | Niezależne tropy, pomocnicze RMA, najlepszy wynik dotąd i dalsze porównanie. |
 | [Aktualizowanie silnika](docs/UPDATING.md) | Rozwój z komputera autora i pobranie nowej wersji na magazynie; bez utraty prywatnej kolejki. |
 | [Odnoga do arkusza](docs/DELEGATION.md) | Kiedy utworzyć osobną rozmowę, jak przekazać zgodę i zadanie, jeden writer i powrót wyniku. |
 | [Wpis do arkusza](docs/SHEET_ENTRY.md) | Mapowanie kolumn, typy API, duplikaty, notatki, formuły, zapis i dokładny odczyt wyniku. |
@@ -76,6 +80,7 @@ wygenerowane żądanie przez istniejący konektor Google i weryfikuje wynik.
 Tworzenie rozmowy wymaga narzędzi Codex desktop opisanych w DELEGATION.md.
 Repo nie tworzy nowych uprawnień, nie loguje automatycznie kont i nie ma tokenów.
 
-Wersja **2.1.0**, źródła i struktura arkusza sprawdzone **12.10.2026**.
+Wersja **2.2.0**, zasady i wyszukiwanie sprawdzone **13.10.2026**;
+struktura arkusza odczytana **12.10.2026**, przed zapisem sprawdzana ponownie.
 Rzeczywiste zamówienia, zdjęcia magazynu, eksporty, manifesty i logi pozostają
 prywatnie poza repo. Opis weryfikacji: [VERIFICATION.md](docs/VERIFICATION.md).

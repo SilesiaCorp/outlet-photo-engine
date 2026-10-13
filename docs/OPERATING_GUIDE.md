@@ -1,6 +1,6 @@
 # Serwis / Reklamacje — silnik identyfikacji i dodawania do outletu
 
-Wersja 2.1, zweryfikowana 12.10.2026. Właściciel procesu: pracownik
+Wersja 2.2, wyszukiwanie zweryfikowane 13.10.2026. Właściciel procesu: pracownik
 Serwis / Reklamacje i jego Codex. Zakres: identyfikacja fizycznego towaru,
 odnalezienie zamówienia, przygotowanie rejestru, autoryzowane przyjęcie
 i kontrola wyniku. Wystawienie oferty, refundacja, naprawa dokumentów,
@@ -105,11 +105,12 @@ ponownie całego katalogu. Lista po EAN, modelu lub SKU zwykle wystarczy.
 
 ## 4. Pierwszy kandydat, API i cache
 
-Domyślnie stosuj [FAST_SEARCH.md](FAST_SEARCH.md): oznaczenia paczki i numery
-zwrotów w zamówieniach mają pierwszeństwo. Po pierwszym wiarygodnym wyniku
-od razu pokaż kandydaturę i uzupełnij tylko tę pozycję. Nie czekaj na pełny
-indeks, wszystkie kartoteki lub globalny ranking. Stary pełny tryb poniżej
-wybieramy jawnie przez `--full-scan`.
+Domyślnie stosuj [FAST_SEARCH.md](FAST_SEARCH.md): równoległe niezależne tropy,
+pomocnicze RMA bez pierwszeństwa, szybki najlepszy kandydat dotąd i dalsze
+sprawdzanie Base oraz archiwum. Pierwszy podgląd nie kończy pracy. Nie czekaj
+na pełny indeks lub wszystkie dokumenty przed propozycją; następnie porównuj
+inne zamówienia i uzupełniaj proponowaną pozycję. Starszy raport pełnego trybu
+pozostaje pod `--full-scan`.
 
 Narzędzie `scripts/find_outlet_candidates.py` wykonuje tylko odczyty Base.
 Przykład pierwszego kandydata dla modelu rozpoznanego ze zdjęć:
@@ -118,7 +119,13 @@ Przykład pierwszego kandydata dla modelu rozpoznanego ze zdjęć:
 py -3 scripts/find_outlet_candidates.py --model MODEL-100/01 --ean EAN_Z_ETYKIETY --preview-only
 ```
 
-Pełne porównanie z wymuszeniem świeżego indeksu:
+Kontynuacja po pokazaniu podglądu, bez oczekiwania na kolejne polecenie:
+
+```powershell
+py -3 scripts/find_outlet_candidates.py --model MODEL-100/01 --ean EAN_Z_ETYKIETY --format jsonl
+```
+
+Starszy pełny raport z wymuszeniem świeżego indeksu:
 
 ```powershell
 py -3 scripts/find_outlet_candidates.py --model MODEL-100/01 --ean EAN_Z_ETYKIETY --full-scan --refresh
@@ -506,14 +513,14 @@ i skutek uśpienia/restartu. Supervisor ma mutex, bezpieczny log i checkpoint.
 
 ## 14. Krótki, czytelny wynik dla pracownika
 
-Pierwszą kandydaturę pokaż natychmiast według FAST_SEARCH.md. Pełny werdykt
-uzupełnij następnie dla tej pozycji. Nie nazywaj pierwszego wyniku globalnie
-najlepszym, gdy reszta nie była sprawdzana. Raport ma mieścić się w kilku
-punktach i małej tabeli:
+Każdy wynik zaczynaj od najlepszego kandydata dotąd według FAST_SEARCH.md,
+pokazanego natychmiast. Następnie kontynuuj inne zamówienia i archiwum,
+uzupełniając werdykt proponowanej pozycji. Nie nazywaj wyniku częściowego
+globalnie najlepszym. Raport ma mieścić się w kilku punktach i małej tabeli:
 
-1. **Produkt:** marka, pełny model, EAN z etykiety; obserwacja stanu.
-2. **Kandydaci:** BL, SKU, data, status, najważniejszy dowód, duplikat/wyjątek.
-3. **Najlepszy kandydat roboczy:** numer i jedno zdanie uzasadnienia.
+1. **Najlepszy kandydat dotąd:** BL, model/SKU i jedno zdanie uzasadnienia.
+2. **Produkt:** marka, pełny model, EAN z etykiety; obserwacja stanu.
+3. **Kandydaci:** istotne alternatywy, data/status, dowód i wyjątek.
 4. **Pewność:** dopasowany model / kandydat / potwierdzona sztuka.
 5. **Do rozstrzygnięcia:** najmniejszy brakujący dowód lub następny krok.
 
@@ -581,7 +588,9 @@ i [pełny zapis do arkusza](SHEET_ENTRY.md). Pełny materiał instrukcji źród�
 z sekcjami 01–12 znajduje się w [SHEET_INSTRUCTIONS.md](SHEET_INSTRUCTIONS.md).
 Format odpowiedzi i zgód opisuje [CONVERSATION_FORMAT.md](CONVERSATION_FORMAT.md).
 
-Wyszukiwanie jest zakończone po podaniu zakresu, kandydatów i brakujących dowodów.
+Podanie pierwszego kandydata nie kończy wyszukiwania. Kończ po potwierdzeniu
+lub przerwaniu przez właściciela, przejściu do kolejnego produktu albo po
+sprawdzeniu właściwego zakresu Base i archiwum, z jawnymi wyjątkami.
 Wpis do arkusza jest zakończony po odczycie właściwego wiersza, typów, danych
 i trwałego OP. Przyjęcie magazynowe wymaga dodatkowo potwierdzonego dokumentu,
 pozycji i końcowego checkboxa. Nie utożsamiaj tych trzech etapów.

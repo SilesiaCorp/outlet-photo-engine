@@ -35,7 +35,7 @@ projektu Marketplace ani prywatnych repozytoriów.
    Odbiorca i potwierdzenie maila pozostają w prywatnym checkpointcie.
    Nie wysyłaj skomplikowanych linków do konkretnego SHA lub zamówienia.
 
-## Na magazynie — pierwsza aktualizacja z wersji 2.0
+## Na magazynie — aktualizacja kopii Git
 
 Po zakończeniu bieżącego wpisu/operacji otwórz folder sklonowanego repo.
 Sprawdź `git status --short`; lokalne zmiany rozlicz bez kasowania lub
@@ -49,8 +49,10 @@ Następnie polecenie w dotychczasowej głównej rozmowie:
 
 > Zaktualizowałem repo silnika. Odczytaj bieżące AGENTS.md,
 > docs/FAST_SEARCH.md, docs/CONVERSATION_FORMAT.md i CHANGELOG.md.
-> Od następnego produktu działaj według nowej wersji, z pierwszeństwem
-> numeru zwrotu/przesyłki i natychmiastowym pierwszym kandydatem.
+> Od następnego produktu działaj według nowej wersji: pomocnicze numery
+> zwrotów, szybki najlepszy kandydat dotąd, dalsze porównanie Base i archiwum.
+> Moje przerwanie lub przejście do kolejnego produktu potwierdza ostatnio
+> pokazane dopasowanie.
 > Zachowaj istniejącą odnogę, kolejkę i nierozliczone OP.
 
 Nie trzeba tworzyć nowej rozmowy ani nowej odnogi do każdego wydania.

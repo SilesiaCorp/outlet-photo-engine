@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "outlet-photo-engine"
-version = "2.1.0"
+version = "2.2.0"
 description = "Photo-to-Base discovery, complete Polish verdicts and approved sheet-entry workflow"
 requires-python = ">=3.11"
 dependencies = []

@@ -202,14 +202,16 @@ def main() -> int:
     parser.add_argument("--order-id", type=int, action="append", default=[],
                         help="Konkretny numer BL wskazany przez pracownika; bez skanowania wszystkich statusów")
     parser.add_argument("--return-number", "--return-code", dest="return_number", default="",
-                        help="Pełny numer zwrotu/RMA z paczki; także numery zapisane w notatkach Base")
+                        help="Pomocniczy numer zwrotu/RMA; nie blokuje trafienia po produkcie")
     parser.add_argument("--return-id", type=int, help="Wewnętrzny ID zwrotu Base; inny niż numer zamówienia")
     parser.add_argument("--tracking-number", default="", help="Pełny numer przesyłki z etykiety, nie telefon automatu")
     parser.add_argument("--external-order-id", default="", help="Numer transakcji/zamówienia marketplace")
     parser.add_argument("--exclude-order-id", type=int, action="append", default=[], help="Pomiń kandydata odrzuconego dla tej sztuki")
     parser.add_argument("--preview-only", action="store_true", help="Natychmiastowy pierwszy kandydat i ceny z zamówienia; faktury/przesyłki w kolejnym kroku")
+    parser.add_argument("--stop-after-first", action="store_true", help="Tylko odczyt wybranej pozycji; bez dalszego porównania")
+    parser.add_argument("--strict-return-reference", action="store_true", help="Jawne szukanie konkretnego RMA zamiast pomocniczego tropu")
     parser.add_argument("--full-scan", action="store_true", help="Porównaj wszystkich kandydatów po modelu/SKU/EAN; wolniejszy pełny tryb")
-    parser.add_argument("--deep", action="store_true", help="Rozszerz szukanie konkretnego numeru na wszystkie bieżące statusy")
+    parser.add_argument("--deep", action="store_true", help="Rozszerz dalsze porównanie na wszystkie bieżące statusy")
     parser.add_argument("--condition-note", help="Potwierdzona obserwacja ze zdjęcia lub od pracownika")
     parser.add_argument("--refresh", action="store_true", help="Odśwież aktualne statusy zamiast cache")
     parser.add_argument("--cache-dir", type=Path, default=private_root() / "outlet-discovery")
@@ -224,7 +226,7 @@ def main() -> int:
         parser.error("Numer BL musi być dodatni.")
     if args.return_id is not None and args.return_id <= 0:
         parser.error("ID zwrotu Base musi być dodatni.")
-    if args.full_scan and any([args.return_number, args.return_id, args.tracking_number, args.external_order_id, args.preview_only, args.deep]):
+    if args.full_scan and any([args.return_number, args.return_id, args.tracking_number, args.external_order_id, args.preview_only, args.deep, args.stop_after_first, args.strict_return_reference]):
         parser.error("Dla konkretnego oznaczenia użyj trybu pierwszego kandydata; --deep rozszerza jego zakres.")
     config = json.loads((ROOT / "configs" / "outlet-intake.json").read_text(encoding="utf-8"))
     token = require_env("BASELINKER_TOKEN")
@@ -270,11 +272,14 @@ def main() -> int:
                 def preview(event):
                     event["created_at"] = datetime.now(UTC).isoformat()
                     event["http_attempts"] = getattr(client, "http_attempts", calls)
-                    atomic_json(cache_dir / "first-candidate.json", event)
+                    if event["event"] == "candidate_found":
+                        atomic_json(cache_dir / "first-candidate.json", event)
+                    atomic_json(cache_dir / "shown-candidate.json", event)
                     if args.format == "jsonl":
                         print(json.dumps(event, ensure_ascii=False), flush=True)
                     elif args.format == "markdown":
-                        print(f"- Pierwszy wiarygodny kandydat: **BL {event['order_id']}**, SKU **{event['product'].get('sku') or 'brak'}**.", flush=True)
+                        label = "Najlepszy dotąd kandydat" + (" — aktualizacja" if event["event"] == "candidate_updated" else "")
+                        print(f"- {label}: **BL {event['order_id']}**, SKU **{event['product'].get('sku') or 'brak'}**.", flush=True)
                         print(f"- Dowód: {evidence_text(event['evidence'])} Sztuka do potwierdzenia.", flush=True)
 
                 engine = FirstCandidateSearch(read, fast_cache,
@@ -284,7 +289,10 @@ def main() -> int:
                     return_number=args.return_number, return_id=args.return_id, tracking_number=args.tracking_number,
                     external_order_id=args.external_order_id, excluded_order_ids=args.exclude_order_id,
                     deep=args.deep, on_candidate=preview, preview_only=args.preview_only,
-                    condition_note=args.condition_note, started_at=started)
+                    condition_note=args.condition_note, started_at=started,
+                    strict_return_reference=args.strict_return_reference,
+                    continue_search=not args.preview_only and not args.stop_after_first and not args.strict_return_reference and not args.order_id and not args.external_order_id,
+                    on_checkpoint=lambda report: atomic_json(cache_dir / "latest-result.json", report))
                 result = engine.run()
                 result["scope"]["http_attempts"] = getattr(client, "http_attempts", calls)
                 atomic_json(cache_dir / "latest-result.json", result)
@@ -306,9 +314,13 @@ def main() -> int:
                 if not result["scope"]["candidate_enrichment_complete"]:
                     print("- Wstępny kandydat: faktury/przesyłki i pełna kwalifikacja wymagają dalszego odczytu.")
             else:
-                print("- Brak potwierdzonego kandydata w sprawdzonym zakresie. Następny krok: dokładny numer w notatkach Base i archiwum.")
-            print("- Zakres: pierwszy wiarygodny wynik; pełne porównanie i archiwum nie zostały wykonane.")
-            print(f"- API: {calls} żądań; pierwszy kandydat po {result['scope']['time_to_first_candidate_seconds']} s.")
+                print("- Najlepszy kandydat dotąd: **brak w sprawdzonym zakresie**. Następny krok: inne tropy produktu i archiwum.")
+            if result["scope"].get("current_api_comparison_complete"):
+                print(f"- Kandydaci w sprawdzonym zakresie API: {len(result['candidates'])}. Archiwum wymaga dalszego sprawdzenia w panelu Base.")
+            else:
+                print("- Wynik wstępny. Dalsze porównanie Base i archiwum pozostaje do wykonania.")
+            timing = result['scope']['time_to_first_candidate_seconds']
+            print(f"- API: {calls} żądań" + (f"; pierwsza propozycja po {timing} s." if timing is not None else "."))
         return 0
     with exclusive_cache(cache_dir / "discovery.lock"):
         specified_orders = {}

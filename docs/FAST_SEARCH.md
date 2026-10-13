@@ -1,146 +1,152 @@
-# Najszybsza droga do pierwszego wiarygodnego kandydata
+# Szybki najlepszy kandydat i dalsze sprawdzanie
 
-Cel: **pokaż pierwszego prawdopodobnego kandydata natychmiast**, gdy świeży
-dowód łączy oznaczenie/produkt z zamówieniem. Pełna lista i globalny ranking
-nie są warunkiem pierwszej odpowiedzi. Dopiero potem uzupełniamy wybraną
-pozycję i przechodzimy do jej zatwierdzenia.
+Cel: **na początku pokaż najlepszego kandydata znalezionego dotąd**, a potem
+kontynuuj porównywanie Base i archiwum. Nie czekaj z pierwszą odpowiedzią na
+pełny przegląd. Nie kończ wyszukiwania tylko dlatego, że pojawiła się propozycja.
 
-## 1. Najpierw oczywiste rzeczy ze zdjęcia
+## 1. Niezależne tropy, bez pierwszeństwa numerów zwrotu
 
-Odczytaj w jednym przebiegu wszystkie widoczne etykiety. Kolejność prób:
+Odczytaj w jednym przebiegu wszystkie etykiety. Wykorzystuj model/wariant,
+EAN, SKU, numer BL/transakcji, pełną przesyłkę i numer zwrotu jako niezależne
+tropy. Łącz tanie odczyty i wykonuj niezależne żądania równolegle, jeśli to
+przyspiesza wynik. Lokalny cache jest wskazówką; wybraną pozycję czytaj świeżo.
 
-| Oznaczenie | Najkrótsza droga |
+**Numery zwrotów/RMA były wpisywane błędnie.** Nie mają pierwszeństwa ani
+samodzielnego wpływu na ranking. Brak lub niezgodność takiego numeru nie
+blokuje kandydata dopasowanego po produkcie. Zgodność z notatką jest tropem,
+a nie potwierdzeniem fizycznej sztuki. Jawne polecenie wyszukania konkretnego
+RMA można wykonać osobno, ale nie zamieniaj go automatycznie w warunek każdego
+wyszukiwania po zdjęciu.
+
+| Trop | Tani odczyt |
 | --- | --- |
-| Numer zwrotu / RMA | Prywatny indeks oznaczeń → świeży rekord zwrotu lub notatka zamówienia → powiązany numer BL. |
-| Wewnętrzny ID zwrotu Base | getOrderReturns(return_id), porównanie produktu, od razu propozycja powiązanego BL. |
-| Pełny numer przesyłki | Indeks przesyłek → świeża przesyłka zamówienia; przy braku indeksu dokładny filtr panelu. |
-| Numer BL | Jeden getOrders(order_id), bez skanu statusów i całego katalogu. |
-| Numer transakcji marketplace | getOrders(filter_external_order_id), porównanie produktu. |
-| SKU / pełny model / oryginalny EAN | Lokalny indeks → świeży kandydat; następnie pierwsze odpowiednie strony statusów i celowany katalog tylko w razie potrzeby. |
+| Model / EAN / SKU | Najmocniejsza dostępna wskazówka produktu z cache → świeży getOrders; dalej strony odpowiednich statusów i celowany katalog. |
+| BL / numer transakcji | getOrders(order_id) / getOrders(filter_external_order_id). |
+| Pełny numer przesyłki | Prywatny indeks → świeże getOrderPackages lub dane zamówienia; następnie dokładny filtr panelu. |
+| Numer zwrotu / RMA | Pomocniczo: indeks, notatki zamówienia, pola dodatkowe i rejestr getOrderReturns. |
+| Wewnętrzny ID zwrotu Base | getOrderReturns(return_id); powiązanie produktu i oryginalnego BL nadal wymaga weryfikacji. |
 
-Nie pomijaj numeru zwrotu dlatego, że rozpoznano model. Zachowaj pełny
-prefiks i zera. Telefon automatu DPD, numer punktu odbioru, EAN, kod partii
-i numer seryjny są różnymi identyfikatorami. Nie wysyłaj telefonu jako
-return_id lub numeru przesyłki. Przy kilku etykietach określ, które są
-aktualne i czego dotyczą; nie utożsamiaj automatycznie etykiety zakupu ze zwrotną.
+Zachowuj prefiksy i zera. Telefon automatu DPD, numer punktu, EAN, partia,
+numer seryjny i numer przesyłki mają różne znaczenia. Nie wysyłaj telefonu
+jako return_id lub tracking. Rozróżnij etykietę zakupu i zwrotu.
 
-## 2. Numery zwrotów wpisane w samych zamówieniach
+## 2. Szybka odpowiedź, potem kontynuacja
 
-Firma wprowadza numery zwrotów również w rekordach zamówień. Dlatego
-wyszukiwanie sprawdza **Notatki**, `extra_field_2`, `admin_comments` i
-nazwane pola dodatkowe, a nie tylko osobny rejestr zwrotów.
-
-- `getOrders(include_custom_extra_fields=true)` udostępnia wartości tych pól.
-- `getOrderExtraFields` rozpoznaje ich aktualne nazwy. W sprawdzonym układzie
-  standardowe pole `2` ma nazwę **Notatki**. Nie zakładaj stałego ID przyszłego
-  dedykowanego pola RMA; rozpoznaj je z metadanych.
-- Obsługujemy m.in. „Numer zwrotu”, „Nr zwrotu”, „ID zwrotu”, „Kod zwrotu”,
-  „RMA”, „Return number” oraz nazwę z dopiskiem marketplace.
-- Pusty getOrderReturns nie wyklucza numeru w notatce lub przesyłki zwrotnej.
-- RMA w rejestrze zwrotów ma własne `return_id`, `reference_number`,
-  `external_order_id` i powiązane `order_id` / `order_product_id`.
-  `external_order_id` w tym rejestrze jest kodem zwrotu, nie automatycznie
-  numerem zamówienia sprzedaży.
-
-Base nie dokumentuje filtra getOrders po dowolnej notatce, numerze przesyłki
-lub numerze RMA zapisanym w dodatkowym polu. Nie wysyłaj wymyślonych
-`filter_return_number`, `filter_notes` albo `filter_delivery_package_nr`.
-Ignorowany parametr mógłby zwrócić niepowiązane zamówienia.
-
-Jeśli dokładnego oznaczenia nie ma jeszcze w indeksie i rejestrze,
-użyj **dokładnego wyszukiwania w panelu Base** po notatce/polu dodatkowym
-lub przesyłce, na bieżącym stanie interfejsu. Ustaw właściwy zakres oraz
-wyczyść poprzednie filtry. Dla starego towaru sprawdź archiwum. Gdy UI jest
-niedostępne albo nie rozstrzyga, `--deep` skanuje oznaczenie w bieżących
-zamówieniach wszystkich statusów, strona po stronie, i kończy na trafieniu.
-Nie odczytuj każdego zamówienia osobnym żądaniem tylko po to, aby zbudować indeks.
-
-## 3. Pierwsza odpowiedź przed pełnym przeglądem
-
-Dla pierwszej propozycji uruchom szybki podgląd:
+Jeśli narzędzie przekazuje zdarzenia na bieżąco, uruchom domyślny przebieg:
 
 ```powershell
-py -3 scripts/find_outlet_candidates.py --model "MODEL_Z_ETYKIETY" --return-number "PELNY_NUMER_ZWROTU" --preview-only --format json
-py -3 scripts/find_outlet_candidates.py --return-id ID_ZWROTU_BASE --sku "SKU_Z_ETYKIETY" --preview-only --format json
-py -3 scripts/find_outlet_candidates.py --model "MODEL_Z_ETYKIETY" --tracking-number "PELNY_NUMER_PRZESYLKI" --preview-only --format json
-py -3 scripts/find_outlet_candidates.py --model "MODEL_Z_ETYKIETY" --preview-only --format json
+py -3 scripts/find_outlet_candidates.py --model "MODEL_Z_ETYKIETY" --ean "EAN_Z_ETYKIETY" --return-number "POMOCNICZY_NUMER" --format jsonl
 ```
 
-Pokaż od razu:
+`candidate_found` pojawia się przed finansowym uzupełnieniem i porównaniem
+innych zamówień. Obsłuż je od razu w rozmowie. `candidate_updated` oznacza
+mocniejszego kandydata; `result` podaje stan sprawdzonego zakresu API.
+Zwykły JSON jest jednym końcowym obiektem, nie strumieniem.
 
-> **Pierwszy wiarygodny kandydat: BL [numer], [model / SKU].**
-> Dowód: [numer zwrotu zgodny z notatką / RMA wskazuje zamówienie / przesyłka /
-> dopasowany produkt i status]. Sztuka do potwierdzenia.
-
-Nie opóźniaj tej informacji pobieraniem wszystkich kartotek, faktur innych
-zamówień, pełnego arkusza lub globalnego rankingu. Następnie odczytaj dane
-**wyłącznie tego kandydata**, bez `--preview-only`, i podaj pełny werdykt
-z firmą zakupu, netto/brutto/VAT, własnością oraz wszystkimi polami arkusza.
-Jeśli faktów nie ma, pokaż ich brak; nie zastępuj ceny zakupu kwotą zwrotu.
-
-Drugi odczyt przypnij do numeru znalezionego BL, aby nie proponować innej
-pozycji podczas uzupełniania. Zachowaj znane oznaczenia jako kontrolę zgodności:
+Jeśli narzędzie oddaje stdout dopiero po zakończeniu procesu, najpierw:
 
 ```powershell
-py -3 scripts/find_outlet_candidates.py --order-id ZNALEZIONY_BL --model "MODEL_Z_ETYKIETY" --format json
+py -3 scripts/find_outlet_candidates.py --model "MODEL_Z_ETYKIETY" --ean "EAN_Z_ETYKIETY" --return-number "POMOCNICZY_NUMER" --preview-only --format json
 ```
 
-Bez `--preview-only` skrypt nadal kończy wyszukiwanie na pierwszym kandydacie,
-ale uzupełnia jego faktury i przesyłki. `--format jsonl` emituje
-`candidate_found` **przed** tym uzupełnieniem, a następnie `result`.
-Obsłuż pierwsze zdarzenie od razu. Sam JSON bez JSONL jest jednym końcowym
-obiektem; nie parsuj go jako strumienia częściowego.
+Pokaż bez zwłoki:
 
-## 4. Powiązanie RMA jest wcześniejsze niż odczyt całego zamówienia
+> **Najlepszy kandydat dotąd: BL [numer], [model / SKU] — wstępny.**
+> Dowód: [konkretne dopasowanie]. Sprawdzam dalej inne zamówienia Base i archiwum.
 
-Jeśli rejestr zwrotów podaje oryginalny numer BL i jeden zgodny produkt,
-proponujemy to zamówienie już po odczycie zwrotu. Nie czekamy, aż API odczyta
-całą kartę sprzedaży. Ma to znaczenie również przy archiwum.
+Następnie **bez czekania na odpowiedź pracownika** wywołaj ten sam zakres
+bez `--preview-only`, z `--format jsonl`. Uzupełniaj firmę zakupu, netto,
+brutto, VAT, właściciela i wszystkie pola arkusza proponowanej pozycji.
+Nie opóźniaj pierwszej propozycji odczytem pełnego arkusza ani dokumentów
+wszystkich alternatyw. Braki pozostają jawne.
 
-W podglądzie RMA pola zakupu, daty zamówienia i ilość fizyczna pozostają
-nieustalone. Ilość rejestru zwrotu pokazujemy osobno. Nie kopiujemy kwoty
-refundacji do kosztu ani daty zgłoszenia zwrotu do daty sprzedaży/otrzymania.
-`order_readback_complete=false` wymaga odczytu oryginalnej karty przed wpisem.
-Gdy getOrders zwraca pustą listę, powiązanie z RMA nadal jest kandydaturą;
-odczytaj panel/archiwum, bez przywracania zamówienia do obiegu.
+Domyślnie skrypt porównuje kolejne pasujące zamówienia z cache, rodzimych
+zwrotów i statusów zwrot/anulowanie/serwis. Rejestr zwrotów jest odczytywany
+równolegle z tanimi odczytami innych pasujących zamówień. Paginacja kontynuuje
+za pierwszą stronę bez ponownego żądania tej samej strony w jednym przebiegu.
+`--deep` rozszerza porównanie na wszystkie bieżące statusy.
 
-## 5. Cache, prędkość i kolejne próby
+Gdy pokażesz mocniejsze trafienie, zaczynaj aktualizację od nowego najlepszego
+BL i jednego zdania wyjaśnienia. Ranking porównuje obserwowane dowody produktu,
+przesyłki, świeży odczyt i dane zwrotu; data rozstrzyga porównywalne tropy.
+RMA wpisany ręcznie nie dodaje punktów. Nie wymyślaj procentów pewności.
 
-- Cache jest prywatny, poza repo, osobny dla konfiguracji Base. SQLite
-  przechowuje oznaczenia → BL, minimalne pozycje i metadane. Całe notatki,
-  dane klienta i bankowe zwrotu nie są indeksowane.
-- Stary indeks wersji 2.0 jest importowany jako wskazówka; zawsze robimy
-  świeży odczyt wybranego zamówienia/zwrotu. Stary status nie jest dowodem.
-- Pierwsze strony API są przetwarzane na bieżąco. Pełna strona 100 rekordów
-  nie wymusza pobrania kolejnej, jeśli jest już wiarygodny kandydat.
-- Zapisy cache wykonujemy partią, a nie osobnym dyskowym commitem na rekord.
-  Wczesna propozycja pojawia się przed dalszym uzupełnianiem.
-- Usunięto stałe 0.7 s między żądaniami w szybkim trybie. Lokalny budżet
-  respektuje 100 żądań/minutę; kolejne tanie odczyty nie czekają, gdy budżet
-  jest wolny. Faktyczny retry HTTP również zużywa budżet. Inne komputery
-  i aplikacje trzeba uwzględniać przy wspólnym limicie konta.
-- Faktury i przesyłki jednego kandydata są odczytywane równolegle.
-- Czas do pierwszego kandydata i liczbę żądań zapisujemy w receipt.
-  To pomiar konkretnej próby, nie gwarancja czasu przy każdym API/archiwum.
+## 3. Archiwum po wstępnej propozycji
 
-Po odrzuceniu kandydata nie powtarzaj jego propozycji:
+Po szybkim wyniku sprawdź także archiwum Base. Nie traktuj zakończenia skryptu
+lub `current_api_comparison_complete=true` jako końca pracy rozmowy.
+`includes_archive=false` i `followup_required=["archive"]` oznaczają, że
+trzeba jeszcze wykonać celowany odczyt panelu/archiwum.
 
-```powershell
-py -3 scripts/find_outlet_candidates.py --model "MODEL_Z_ETYKIETY" --exclude-order-id ODRZUCONY_BL --preview-only
-```
+W żywym panelu wybierz archiwum, wyczyść poprzednie filtry i szukaj pełnego
+modelu/EAN/SKU oraz dostępnych etykiet. Odczytaj pasujące karty i porównaj
+produkty, pozycje, statusy, przesyłki/zwroty i dokumenty. Numery RMA są jednym
+z pomocniczych filtrów, nie jedyną drogą. Nie przywracaj zamówień z archiwum
+do obiegu na potrzeby odczytu. Jeśli dostęp do archiwum jest niedostępny,
+podaj ten konkretny brak; nie deklaruj wykluczenia innych zamówień.
 
-Pełne porównanie jest opcją, gdy człowiek go potrzebuje:
+Kontynuuj do przerwania przez właściciela, jego potwierdzenia albo rzeczywistego
+sprawdzenia właściwego zakresu. Nie uruchamiaj monitora ani powtarzalnego
+pollingu po wyczerpaniu dostępnych dowodów.
 
-```powershell
-py -3 scripts/find_outlet_candidates.py --model "MODEL_Z_ETYKIETY" --full-scan
-```
+## 4. Co oznacza przerwanie lub kolejny produkt
 
-Znany numer zwrotu/przesyłki, który nie pasuje do zamówienia, nie może zostać
-zastąpiony samym podobnym modelem. Konflikt wariantu także blokuje tę
-kandydaturę. Do wpisu nadal obowiązują zgoda, fizyczna ilość/stan, wycena,
-własność, duplikaty i odczyt wyniku opisane w SHEET_ENTRY.md.
+Właściciel ustalił: **gdy przerywa dalsze szukanie lub przechodzi do nowego
+produktu, ostatnio pokazane dopasowanie było właściwe**. Nie pytaj ponownie
+o ten sam BL. Zapisz `accepted_after_user_transition` prywatnie zgodnie z
+CONVERSATION_FORMAT.md, zatrzymaj proces poprzedniego wyszukiwania i obsłuż
+kolejne zdjęcia. Nie kieruj nowego zdjęcia do starego OP.
 
-Źródła techniczne: [getOrders](https://api.baselinker.com/index.php?method=getOrders),
+Decyduje ostatni jednoznacznie wskazany najlepszy kandydat, który był widoczny
+w rozmowie. `shown-candidate.json` zachowuje ostatnie zdarzenie propozycji,
+`first-candidate.json` pierwsze, a `latest-result.json` stan częściowy/końcowy.
+Niewyświetlona zmiana w pliku nie zastępuje decyzji pracownika. Jawne odrzucenie
+lub wskazanie innego numeru ma pierwszeństwo. Timeout, awaria i samo wyjście
+skryptu nie oznaczają potwierdzenia człowieka.
+
+Potwierdzenie dopasowania i zgoda na dokładny wpis pozostają rozliczone według
+CONVERSATION_FORMAT.md i DELEGATION.md. Istniejąca zgoda na wpis działa dalej
+w odnodze; nie dopisuj nieznanych cen, ilości ani stanu na podstawie przerwania.
+
+## 5. Pomocnicze RMA w zamówieniach i API
+
+Sprawdzaj Notatki, `extra_field_2`, `admin_comments` i nazwane pola dodatkowe.
+`getOrders(include_custom_extra_fields=true)` daje ich wartości;
+`getOrderExtraFields` aktualne nazwy. Standardowe pole 2 to Notatki;
+przyszłe dedykowane ID ustal z metadanych. Parser rozpoznaje m.in. Numer/Nr/ID
+zwrotu, Kod zwrotu, RMA, Return number i nazwy z dopiskiem marketplace.
+
+Rejestr getOrderReturns zawiera własne return_id, reference_number,
+external_order_id oraz powiązane order_id/order_product_id. external_order_id
+zwrotu nie jest automatycznie numerem zamówienia sprzedaży. Rejestr może
+wskazać kandydaturę z archiwum przed odczytem oryginalnej karty; koszt zakupu,
+daty i ilość fizyczna pozostają wtedy do weryfikacji. Kwota refundacji nie
+zastępuje ceny zakupu.
+
+Base nie dokumentuje filtrów getOrders po dowolnej notatce, tracking lub RMA.
+Nie wymyślaj filter_return_number, filter_notes albo filter_delivery_package_nr.
+Ignorowany parametr może zwrócić niepowiązane zamówienia. W panelu korzystaj
+z rzeczywiście dostępnych filtrów, według bieżącego interfejsu.
+
+## 6. Tryby dodatkowe i prywatność
+
+- `--preview-only`: szybki etap; rozmowa kontynuuje kolejnym odczytem.
+- `--stop-after-first` lub jawny BL/transakcja: celowane uzupełnienie wybranej
+  pozycji, bez zbędnego porównania przy już ustalonym zamówieniu.
+- `--strict-return-reference`: wyłącznie na jawne polecenie wyszukania
+  konkretnego RMA. Domyślne rozpoznawanie produktu traktuje RMA pomocniczo.
+- `--exclude-order-id`: pomiń odrzuconego kandydata dla tej sztuki.
+- `--full-scan`: starszy pełny raport po modelu; nie jest warunkiem pierwszej
+  propozycji ani zamiennikiem sprawdzenia archiwum.
+- Cache i receipt pozostają poza repo, osobno dla konfiguracji Base. Nie
+  indeksuj całych notatek ani danych klienta/bankowych zwrotu.
+- Aktualny odczyt wybranego zamówienia, budżet 100 żądań/min, równoległe tanie
+  żądania i zapis cache partiami nadal obowiązują. Mierz czas do pierwszej
+  propozycji oddzielnie od dalszego porównania.
+- Zgoda, fizyczna ilość/stan, wycena, właściciel, duplikaty i exact readback
+  pozostają wymaganiami wpisu. Nowy przebieg wyszukiwania ich nie zastępuje.
+
+Źródła API: [getOrders](https://api.baselinker.com/index.php?method=getOrders),
 [getOrderReturns](https://api.baselinker.com/index.php?method=getOrderReturns),
 [getOrderExtraFields](https://api.baselinker.com/index.php?method=getOrderExtraFields),
 [limit API](https://api.baselinker.com/).

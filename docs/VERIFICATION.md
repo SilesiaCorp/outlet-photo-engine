@@ -1,11 +1,12 @@
-# Weryfikacja silnika 2.1.0
+# Weryfikacja silnika 2.2.0
 
-Weryfikacja wykonana 12.10.2026. Repo zawiera niezależną historię samego
+Wyszukiwanie i zasady sprawdzone 13.10.2026; materiał arkusza 12.10.2026.
+Repo zawiera niezależną historię samego
 silnika, bez historii wcześniejszego projektu Marketplace i prywatnych przypadków.
 
 ## Sprawdzone
 
-- **84 testy** na danych umownych: dopasowanie modelu/wariantu i EAN/SKU,
+- **95 testów** na danych umownych: dopasowanie modelu/wariantu i EAN/SKU,
   paginacja i cache, oznaczenie zakresu archiwum, wskazany BL bez skanu statusów,
   ceny vNN netto, historyczne brutto, alokacja, VAT/waluty/spółki, brak danych,
   dowód zgody, prywatna kolejka i jeden writer.
@@ -15,19 +16,21 @@ silnika, bez historii wcześniejszego projektu Marketplace i prywatnych przypadk
   uzupełnieniem finansów i zachowanie kandydatury przy błędzie tego odczytu.
 - Wspólny lokalny budżet API, bez stałego opóźnienia przy wolnym limicie;
   aktualizator dopuszcza kanoniczny origin i blokuje aktywny/niepewny wpis.
+- Nowe reguły: błędny RMA/numer zwrotu nie blokuje produktu, nie ma pierwszeństwa
+  ani bonusu w rankingu; mocniejszy dostępny trop produktu trafia do pierwszego
+  odczytu. Po pierwszym zdarzeniu porównanie trwa dalej, emituje lepszego kandydata,
+  zachowuje konkretną pozycję i częściowy wynik przy błędzie. Pierwsza strona jest
+  wykorzystana ponownie, a zakres archiwum pozostaje otwarty.
 - Plan OUTLET i REKLAMACJE, w tym rekord KLIENT bez przyjęcia własnego stanu:
   rodzime wartości, daty, percent 0.23, tekstowe identyfikatory z zerami,
   checkbox FALSE, brak fikcyjnego PZ, zachowane formuły/notatki/formaty/walidacje.
 - Wykrycie zmiany preimage, błędnego wyniku, niepoprawnego konta, niespójnej
   wyceny, błędnej listy wyboru, duplikatu i wcześniejszego przyjęcia.
-- Rzeczywisty odczyt Base przez samodzielny adapter tego repo; celowany wariant
-  w wersji 2.1 wymagał **3 żądań**, zwrócił pełny werdykt 22 pól, poprawną
-  podstawę cen zakupu i właściciela z dokumentu. Zdarzenie pierwszego kandydata
-  pojawiło się po **0.20 s**, przed odczytem faktur/przesyłek; całość po 0.44 s.
-  Raport rzeczywistego przypadku pozostaje prywatny.
-- Rzeczywisty podgląd po modelu z istniejącym cache: **0.59 s / 2 żądania**.
-  Podgląd powiązania RMA: **0.23 s / 1 żądanie**, z jawnym brakiem odczytu
-  oryginalnej karty i ceny. Są to pomiary konkretnych prób, nie gwarancja czasu.
+- Rzeczywisty odczyt Base w wersji 2.2, z umyślnie błędnym pomocniczym RMA:
+  pierwszy kandydat po **0.52 s / 2 żądania**. Następnie porównanie API trwało
+  do 16.16 s / 37 żądań; wybrany kandydat ma pełne 22 pola werdyktu i odczyt
+  dokumentów finansowych. Archiwum pozostało jawnie do sprawdzenia w panelu.
+  Raport pozostaje prywatny; są to pomiary prób, nie gwarancja czasu.
 - Rzeczywiste metadane Base potwierdziły standardowe pole **2 — Notatki**.
   Dopasowanie numeru wpisanego w notatkę/pole jest sprawdzone testami umownymi;
   nie deklarujemy produkcyjnego trafienia po notatce na podstawie samego odczytu
@@ -46,6 +49,11 @@ nie utworzono PZ ani odnogi z niezleconym wpisem. Pierwszy rzeczywisty wpis
 i dispatch do odnogi wykonywane są po konkretnej zgodzie pracownika,
 z obowiązkowym exact readbackiem. Dostęp do firmowych systemów i narzędzi
 rozmów musi istnieć także na nowym PC.
+
+Przerwanie/przejście właściciela jest regułą potwierdzenia dopasowania w rozmowie,
+nie zdarzeniem wygenerowanym przez skrypt. Nie symulowano zgody człowieka w
+produkcyjnym arkuszu. Archiwum obsługuje wykonawca rozmowy przez dostępny panel;
+sam adapter API nie deklaruje pokrycia archiwum.
 
 Publiczny dostęp do repo i pobranie całego pakietu weryfikujemy przy dostarczeniu
 linku. Produkcyjne receipt, SHA zdalnego commitu i potwierdzenie dostarczenia

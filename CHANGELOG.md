@@ -1,5 +1,20 @@
 # Zmiany silnika
 
+## 2.2.0 — 13.10.2026
+
+- Numery zwrotów/RMA są pomocnicze: nie mają pierwszeństwa, nie blokują
+  dopasowania rozpoznanego produktu i nie podnoszą samodzielnie rankingu.
+- Pierwsza odpowiedź zaczyna się od najlepszego kandydata znalezionego dotąd;
+  mocniejszy późniejszy wynik pojawia się jako krótka aktualizacja.
+- Domyślny przebieg kontynuuje porównanie Base po pierwszej propozycji;
+  rozmowa następnie sprawdza archiwum. Zakres API i archiwum pozostają jawne.
+- Równoległy odczyt rejestru zwrotów i tanich kart zamówień, ponowne użycie
+  pierwszej strony i bez odczytu dokumentów finansowych każdej alternatywy.
+- Zachowany ostatni pokazany kandydat i checkpoint częściowy. Przerwanie
+  dalszego szukania/przejście właściciela do kolejnego produktu potwierdza
+  ostatnie jednoznacznie wskazane dopasowanie; awaria techniczna tego nie robi.
+- Zachowane wcześniejsze zgody na dokładny wpis oraz bramki danych arkusza.
+
 ## 2.1.0 — 12.10.2026
 
 - Domyślny tryb kończy wyszukiwanie na pierwszym świeżym, wiarygodnym kandydacie.

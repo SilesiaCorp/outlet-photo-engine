@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from fixtures import ROOT
-from outlet_engine.fast_search import FastCache, FirstCandidateSearch, exact_token, extract_references, reference
+from outlet_engine.fast_search import FastCache, FirstCandidateSearch, candidate_rank, exact_token, extract_references, reference
 from outlet_engine.rate_limit import RequestBudget
 
 spec = importlib.util.spec_from_file_location("fast_discovery_fixture", ROOT / "scripts/find_outlet_candidates.py")
@@ -44,6 +44,7 @@ class FastSearchTests(unittest.TestCase):
             if response is None: raise AssertionError("Unexpected request: " + method)
             if isinstance(response, Exception): raise response
             return response
+        kwargs.setdefault("strict_return_reference", True)
         return FirstCandidateSearch(call, self.cache,
             matches=lambda p, skus: discovery.matching_reasons(p, model="DEMO100/01", ean="", skus=skus),
             sanitize=discovery.sanitize_order,
@@ -237,6 +238,123 @@ class FastSearchTests(unittest.TestCase):
                              tracking_number="0007711").run()
         self.assertEqual(result["best_candidate"], 17)
         self.assertEqual(result["scope"]["api_calls_to_first_candidate"], 2)
+
+    def test_bad_return_number_does_not_block_or_delay_product_candidate(self):
+        self.seed_statuses()
+        self.cache.remember(discovery.sanitize_order(order(), "ZWROTY DOTARŁY"), [])
+        result = self.search({"getOrders": {"orders": [order(note="Numer zwrotu: WRONG-001")]}},
+                             return_number="MISTYPED-009", strict_return_reference=False).run()
+        self.assertEqual(result["best_candidate"], 17)
+        self.assertEqual([m for m, _ in self.calls], ["getOrders"])
+        self.assertEqual(result["candidates"][0]["return_reference"]["policy"], "advisory")
+        self.assertFalse(result["unit_identity_confirmed"])
+
+    def test_first_read_uses_stronger_product_hint_already_available_in_cache(self):
+        self.seed_statuses()
+        weak = {**order(), "date_in_status":200}
+        stronger = {**order(18,sku="BEST-SKU"), "date_in_status":100}
+        for source in [weak,stronger]:
+            self.cache.remember(discovery.sanitize_order(source,"ZWROTY DOTARŁY"),[])
+        result = self.search({"getOrders":{"orders":[stronger]}},skus=["BEST-SKU"],strict_return_reference=False).run()
+        self.assertEqual(result["best_candidate"],18)
+        self.assertEqual(self.calls[0][1]["order_id"],18)
+        self.assertEqual(len(self.calls),1)
+
+    def test_bad_internal_return_id_does_not_block_a_matching_product(self):
+        self.seed_statuses()
+        self.cache.remember(discovery.sanitize_order(order(), "ZWROTY DOTARŁY"), [])
+        result = self.search({"getOrders": {"orders": [order()]}}, return_id=999,
+                             strict_return_reference=False).run()
+        self.assertEqual(result["best_candidate"], 17)
+        self.assertEqual(len(self.calls), 1)
+
+    def test_return_hint_for_other_order_is_not_checked_before_product_hint(self):
+        self.seed_statuses()
+        self.cache.save_refs(18, [{"kind": "return", "value": "MISTYPED-009", "source": "extra_field_2"}])
+        self.cache.remember(discovery.sanitize_order(order(), "ZWROTY DOTARŁY"), [])
+        result = self.search({"getOrders": {"orders": [order()]}}, return_number="MISTYPED-009",
+                             strict_return_reference=False).run()
+        self.assertEqual(result["best_candidate"], 17)
+        self.assertEqual(self.calls[0][1]["order_id"], 17)
+
+    def test_progressive_comparison_emits_first_then_stronger_candidate(self):
+        self.seed_statuses()
+        self.cache.remember(discovery.sanitize_order(order(), "ZWROTY DOTARŁY"), [])
+        stronger = order(18, sku="BEST-SKU")
+        checkpoints = []
+        result = self.search({"getOrders": lambda p: {"orders": [order()] if "order_id" in p else [order(), stronger]},
+                              "getOrderReturns": {"returns": []}}, skus=["BEST-SKU"], continue_search=True,
+                             strict_return_reference=False, on_checkpoint=lambda report: checkpoints.append(report)).run()
+        self.assertEqual([e[0]["event"] for e in self.events], ["candidate_found", "candidate_updated"])
+        self.assertEqual(self.events[0][0]["order_id"], 17)
+        self.assertEqual([m for m, _ in self.events[0][1]], ["getOrders"])
+        self.assertEqual(self.events[1][0]["order_id"], 18)
+        self.assertEqual(checkpoints[0]["best_candidate"], 17)
+        self.assertEqual(result["best_candidate"], 18)
+        self.assertEqual(len(result["candidates"]), 2)
+        self.assertTrue(result["scope"]["current_api_comparison_complete"])
+        self.assertEqual(result["scope"]["followup_required"], ["archive"])
+        self.assertFalse(result["scope"]["includes_archive"])
+        self.assertFalse(result["scope"]["global_ranking_complete"])
+
+    def test_continuation_reuses_first_page_before_reading_next(self):
+        self.seed_statuses()
+        first = [order(i, model="OTHER") for i in range(1, 100)] + [order(100)]
+        result = self.search({"getOrders": lambda p: {"orders": [order(101)] if p.get("id_from") else first},
+                              "getOrderReturns": {"returns": []}}, continue_search=True,
+                             strict_return_reference=False).run()
+        self.assertEqual(result["best_candidate"], 101)
+        calls = [params for method, params in self.calls if method == "getOrders"]
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(calls[1]["id_from"], 101)
+        self.assertEqual(result["scope"]["orders_indexed"], 101)
+
+    def test_failed_continuation_keeps_shown_candidate_and_open_scope(self):
+        self.seed_statuses()
+        self.cache.remember(discovery.sanitize_order(order(), "ZWROTY DOTARŁY"), [])
+        result = self.search({"getOrders": {"orders": [order()]},
+                              "getOrderReturns": RuntimeError("SYNTHETIC_READ_FAILURE")},
+                             continue_search=True, strict_return_reference=False).run()
+        self.assertEqual(result["best_candidate"], 17)
+        self.assertFalse(result["scope"]["current_api_comparison_complete"])
+        self.assertIn("current_api_comparison_incomplete_requires_followup", result["scope"]["exceptions"])
+
+    def test_return_api_failure_does_not_block_other_current_order_matches(self):
+        self.seed_statuses()
+        self.cache.remember(discovery.sanitize_order(order(),"ZWROTY DOTARŁY"),[])
+        result = self.search({"getOrders":lambda p:{"orders":[order()] if "order_id" in p else [order(),order(18)]},
+                              "getOrderReturns":RuntimeError("SYNTHETIC_READ_FAILURE")},
+                             continue_search=True,strict_return_reference=False).run()
+        self.assertEqual(result["best_candidate"],18)
+        self.assertEqual(len(result["candidates"]),2)
+        self.assertFalse(result["scope"]["current_api_comparison_complete"])
+        self.assertIn("native_return_comparison_unavailable",result["scope"]["exceptions"])
+
+    def test_native_preview_is_completed_when_original_card_appears_in_comparison(self):
+        self.seed_statuses()
+        record = {"return_id": 7, "order_id": 17, "products": [order()["products"][0]]}
+        engine = self.search({"getOrderReturns": {"returns": [record]}, "getOrders": {"orders": [order()]}},
+                             return_id=7, strict_return_reference=False)
+        initial = engine.result(engine.native_preview(record))
+        result = engine.compare_remaining(initial)
+        self.assertEqual(result["best_candidate"], 17)
+        self.assertTrue(result["candidates"][0]["order_readback_complete"])
+        self.assertEqual(result["candidates"][0]["verdict"]["sheet_fields"]["Cena Netto"], "100.00")
+
+    def test_matching_return_code_cannot_raise_the_evidence_rank(self):
+        base = {"order_id":17,"matched_by":["MODEL"],"evidence":"matching_product_and_qualifying_status",
+                "order_readback_complete":True,"date_in_status":17}
+        self.assertEqual(candidate_rank(base), candidate_rank({**base,"return_reference":{"status":"matched_but_not_unit_confirmation"}}))
+
+    def test_comparison_keeps_the_specific_returned_item_when_order_has_two_same_models(self):
+        self.seed_statuses()
+        source = order()
+        source["products"].insert(0, {**source["products"][0], "order_product_id":171})
+        record = {"return_id":7,"order_id":17,"products":[order()["products"][0]]}
+        engine = self.search({"getOrderReturns":{"returns":[record]},"getOrders":{"orders":[source]}},
+                             return_id=7,strict_return_reference=False)
+        result = engine.compare_remaining(engine.result(engine.native_preview(record)))
+        self.assertEqual(result["candidates"][0]["product"]["order_product_id"], 170)
 
     def test_bad_pagination_cannot_be_used_as_complete_source(self):
         self.seed_statuses()

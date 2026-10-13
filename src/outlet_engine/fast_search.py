@@ -1,4 +1,4 @@
-"""Identifier-first discovery that stops at the first fresh, plausible candidate."""
+"""Fast proposals followed by comparison; manually entered return codes are advisory."""
 from __future__ import annotations
 
 import hashlib
@@ -111,6 +111,17 @@ def match_reference(record: dict, definitions: dict[str, dict], token: str, kind
     return None
 
 
+def candidate_rank(row: dict) -> tuple:
+    """Rank observed evidence, never a confidence percentage or an RMA-code bonus."""
+    evidence = row.get("evidence", "")
+    return (evidence == "human_selected_order",
+            evidence.startswith("tracking:") or evidence == "exact_cached_package_refreshed",
+            len(set(row.get("matched_by", [])) & {"EAN", "SKU", "MODEL"}),
+            row.get("order_readback_complete") is True,
+            bool(row.get("return_package_count")),
+            row.get("date_in_status") or 0)
+
+
 class FastCache:
     def __init__(self, path: Path):
         self.db = sqlite3.connect(path, timeout=10)
@@ -190,11 +201,19 @@ class FirstCandidateSearch:
                  config: dict, model: str = "", ean: str = "", skus=(), order_ids=(),
                  return_number: str = "", return_id: int | None = None, tracking_number: str = "",
                  external_order_id: str = "", excluded_order_ids=(), deep: bool = False, on_candidate=None,
-                 condition_note: str | None = None, preview_only: bool = False, started_at=None):
+                 condition_note: str | None = None, preview_only: bool = False, started_at=None,
+                 strict_return_reference: bool = False, continue_search: bool = False, on_checkpoint=None):
         self.call, self.cache, self.matches, self.sanitize = call, cache, matches, sanitize
         self.qualifying, self.config = qualifying, config
         self.model, self.ean, self.skus = model, ean, set(skus)
         self.order_ids, self.return_number, self.return_id = list(order_ids), return_number, return_id
+        self.return_hint_number, self.return_hint_id = return_number, return_id
+        self.advisory_returns = not strict_return_reference and bool(model or ean or self.skus)
+        if self.advisory_returns:
+            # Mis-entered return numbers must not block a matching product or delay its proposal.
+            self.return_number, self.return_id = "", None
+        self.strict_return_reference, self.continue_search = strict_return_reference, continue_search
+        self.on_checkpoint = on_checkpoint
         self.tracking, self.external = tracking_number, external_order_id
         self.excluded, self.deep, self.on_candidate = set(excluded_order_ids), deep, on_candidate
         self.condition_note = condition_note
@@ -209,6 +228,9 @@ class FirstCandidateSearch:
         self.cache_used, self.first_at, self.first_calls = False, None, None
         self.requested_missing, self.exceptions = [], []
         self.catalog, self.catalog_checked = {}, False
+        self.page_cache = {}
+        self.comparison_complete = False
+        self.seen_order_ids = set()
 
     def read(self, method: str, params: dict, key: str):
         with self.counter_lock:
@@ -266,7 +288,21 @@ class FirstCandidateSearch:
             self.on_candidate({"event": "candidate_found", "order_id": row["order_id"],
                                "product": row["product"], "evidence": row["evidence"],
                                "purchase_preview": purchase_context(order), "unit_confirmed": False,
+                               "best_so_far": True, "comparison_continues": self.continue_search,
                                "time_to_first_candidate_seconds": round(self.first_at, 3), "api_calls": self.calls})
+
+    def assess_return_hint(self, order: dict, returned: dict | None = None) -> dict:
+        if not self.return_hint_number and self.return_hint_id is None:
+            return {"policy": "advisory", "status": "not_provided"}
+        source = match_reference(order, self.definitions, self.return_hint_number, "return") if self.return_hint_number else None
+        if returned is not None:
+            source = source or (match_reference(returned, self.return_definitions, self.return_hint_number, "return", native_return=True)
+                                if self.return_hint_number else None)
+            if self.return_hint_id is not None and int(returned["return_id"]) == self.return_hint_id:
+                source = source or "native_return_id"
+        return {"policy": "advisory" if self.advisory_returns else "explicit_reference_lookup",
+                "status": "matched_but_not_unit_confirmation" if source else "not_matched_in_this_record",
+                "source": source, "reliable_as_sole_unit_identity": False}
 
     def native_preview(self, record: dict) -> dict | None:
         oid = int(record.get("order_id") or 0)
@@ -297,6 +333,8 @@ class FirstCandidateSearch:
                "matched_by": reasons, "evidence": "native_return_link_requires_original_order_readback",
                "unit_confirmed": False, "eligible_for_review": True, "return_package_count": None,
                "return_couriers": [], "order_readback_complete": False,
+               "financial_enrichment_complete": False,
+               "return_reference": self.assess_return_hint(original, record),
                "native_return": {key: record.get(key) for key in ["return_id", "status_id", "fulfillment_status"]}}
         row["native_return"]["selected_item_quantity"] = selected.get("quantity")
         row["verdict"] = sheet_verdict(original, product, [], original_ean=self.ean, condition_note=self.condition_note)
@@ -410,6 +448,8 @@ class FirstCandidateSearch:
                                and p.get("sku") == product.get("sku")),
                "matched_by": reasons, "evidence": evidence or ("human_selected_order" if explicitly_selected else "matching_product_and_qualifying_status"),
                "unit_confirmed": False, "eligible_for_review": True}
+        row["return_reference"] = self.assess_return_hint(order, returned)
+        row["financial_enrichment_complete"] = False
         if returned is not None:
             row["native_return"] = {key: returned.get(key) for key in ["return_id", "status_id", "fulfillment_status"]}
             returned_items = [p for p in returned.get("products", [])
@@ -447,6 +487,7 @@ class FirstCandidateSearch:
         row["verdict"] = sheet_verdict(order, row["product"], invoices, original_ean=self.ean,
                                         condition_note=self.condition_note)
         self.enrichment_complete = True
+        row["financial_enrichment_complete"] = True
         return row
 
     def live_reference(self, order: dict | None) -> str | None:
@@ -480,19 +521,44 @@ class FirstCandidateSearch:
         return self.candidate(order, evidence=f"native_return:{record['return_id']}", returned=record)
 
     def pages(self, method: str, base: dict, key: str, id_key: str):
-        cursor = 0
+        cursor, position = 0, 0
+        cache_key = (method, json.dumps(base, sort_keys=True), key, id_key)
+        cached = self.page_cache.setdefault(cache_key, [])
         while True:
             params = {**base, **({"id_from": cursor} if cursor else {})}
-            batch = self.read(method, params, key)
+            if position < len(cached):
+                batch = cached[position]
+            else:
+                batch = self.read(method, params, key)
+                cached.append(batch)
             ids = [int(item[id_key]) for item in batch]
             if ids and (min(ids) < cursor or ids != sorted(ids) or len(set(ids)) != len(ids)):
                 raise RuntimeError("Nieprawidłowa paginacja; nie oznaczaj zakresu jako kompletny.")
             yield batch
+            position += 1
             if len(batch) < 100:
                 return
             cursor = max(ids) + 1
 
     def run(self) -> dict:
+        result = self.first_result()
+        if not result["candidates"] and self.advisory_returns and (self.return_hint_number or self.return_hint_id is not None):
+            for record in self.advisory_return_records():
+                if self.return_hint_id is not None and int(record["return_id"]) != self.return_hint_id:
+                    continue
+                if self.return_hint_number and not match_reference(record, self.return_definitions, self.return_hint_number, "return", native_return=True):
+                    continue
+                row = self.native_return(record)
+                if row:
+                    result = self.result(row)
+                    break
+        if self.continue_search and not self.order_ids and not self.external and (self.model or self.ean or self.skus):
+            if self.on_checkpoint:
+                self.on_checkpoint(result)
+            return self.compare_remaining(result)
+        return result
+
+    def first_result(self) -> dict:
         row = None
         strong = bool(self.return_number or self.tracking or self.return_id is not None)
         token, kind = (self.return_number or str(self.return_id or ""), "return") if self.return_number or self.return_id is not None else (self.tracking, "tracking")
@@ -573,7 +639,9 @@ class FirstCandidateSearch:
             self.fields()
         self.scope_steps.append("cached_product_or_reference")
         # An absent reference index is not a reason for hundreds of per-order API calls.
-        hints = sorted(self.cache.orders(), key=lambda o: o.get("date_in_status") or 0, reverse=True) if not strong else []
+        hints = sorted(self.cache.orders(), key=lambda o: (
+            max((len(self.product_matches(p)) for p in o.get("products", [])), default=0),
+            o.get("date_in_status") or 0), reverse=True) if not strong else []
         for hint in hints:
             if int(hint["order_id"]) in self.excluded: continue
             if not strong and not any(self.product_matches(p) for p in hint.get("products", [])): continue
@@ -596,7 +664,8 @@ class FirstCandidateSearch:
         for scope in scopes:
             for batch in self.pages("getOrders", {**scope, "get_unconfirmed_orders": True,
                                                    "include_custom_extra_fields": True}, "orders", "order_id"):
-                self.orders_seen += len(batch)
+                self.seen_order_ids.update(int(o["order_id"]) for o in batch)
+                self.orders_seen = len(self.seen_order_ids)
                 for order in batch:
                     self.fresh[int(order["order_id"])] = order
                 ordered = sorted(batch, key=lambda o: o.get("date_in_status") or 0, reverse=True)
@@ -616,17 +685,152 @@ class FirstCandidateSearch:
                     if row: return self.result(row)
         return self.result(None)
 
+    def advisory_return_records(self):
+        for batch in self.pages("getOrderReturns", {"include_custom_extra_fields": True}, "returns", "return_id"):
+            if not self.return_definitions and any(r.get("custom_extra_fields") for r in batch):
+                self.fields(returns=True)
+            for record in batch:
+                if record.get("order_id"):
+                    self.cache.save_refs(int(record["order_id"]), extract_references(record, self.return_definitions, native_return=True),
+                                         return_id=int(record["return_id"]), commit=False)
+                yield record
+            self.cache.db.commit()
+
+    def compare_remaining(self, initial: dict) -> dict:
+        """Continue locally after the early proposal; only improve the best-so-far result."""
+        rows = {row["order_id"]: row for row in initial["candidates"]}
+        best = initial["candidates"][0] if initial["candidates"] else None
+        original_preview = self.preview_only
+        return_bindings = {}
+        comparison_ok = True
+        self.preview_only = True  # Other orders do not need financial-document reads.
+        self.scope_steps.append("compare_other_current_orders_after_preview")
+
+        def consider(row):
+            nonlocal best
+            if row is None:
+                return
+            prior = rows.get(row["order_id"])
+            if prior is not None and prior.get("financial_enrichment_complete"):
+                row = prior
+            rows[row["order_id"]] = row
+            if best is None:
+                best = row
+            elif row["order_id"] == best["order_id"]:
+                best = row
+            elif row["order_id"] != best["order_id"] and candidate_rank(row) > candidate_rank(best):
+                previous = best["order_id"]
+                best = row
+                if self.on_candidate:
+                    self.on_candidate({"event": "candidate_updated", "order_id": row["order_id"],
+                        "previous_best_candidate": previous, "product": row["product"], "evidence": row["evidence"],
+                        "purchase_preview": purchase_context(self.fresh.get(row["order_id"]) or {}),
+                        "unit_confirmed": False, "best_so_far": True, "comparison_continues": True,
+                        "api_calls": self.calls, "time_to_first_candidate_seconds": round(self.first_at, 3)})
+
+        # Network reads can run together; SQLite/cache mutations stay on this thread.
+        return_key = ("getOrderReturns", json.dumps({"include_custom_extra_fields": True}, sort_keys=True), "returns", "return_id")
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            return_job = pool.submit(self.read, "getOrderReturns", {"include_custom_extra_fields": True}, "returns") if return_key not in self.page_cache else None
+            try:
+                for hint in self.cache.orders():
+                    oid = int(hint["order_id"])
+                    if oid in rows or oid in self.excluded or not any(self.product_matches(p) for p in hint.get("products", [])):
+                        continue
+                    try:
+                        consider(self.candidate(self.order(oid)))
+                    except RuntimeError:
+                        comparison_ok = False
+                        self.exceptions.append("cached_candidate_read_requires_followup")
+                native_available = True
+                if return_job:
+                    try:
+                        self.page_cache[return_key] = [return_job.result()]
+                    except RuntimeError:
+                        native_available = False
+                        comparison_ok = False
+                        self.exceptions.append("native_return_comparison_unavailable")
+                if native_available:
+                    try:
+                        for record in self.advisory_return_records():
+                            oid = int(record.get("order_id") or 0)
+                            if oid in rows and rows[oid].get("native_return", {}).get("return_id") == record["return_id"]:
+                                return_bindings[oid] = record
+                            if oid in rows or oid in self.excluded or not any(self.product_matches(p) for p in record.get("products", [])):
+                                continue
+                            row = self.native_return(record)
+                            if row:
+                                return_bindings[oid] = record
+                            consider(row)
+                    except RuntimeError:
+                        comparison_ok = False
+                        self.exceptions.append("native_return_comparison_unavailable")
+                names = self.statuses()
+                scopes = [{}] if self.deep else [{"status_id": oid} for oid, name in names.items() if self.qualifying(name)]
+                for scope in scopes:
+                    for batch in self.pages("getOrders", {**scope, "get_unconfirmed_orders": True,
+                                                          "include_custom_extra_fields": True}, "orders", "order_id"):
+                        self.seen_order_ids.update(int(o["order_id"]) for o in batch)
+                        self.orders_seen = len(self.seen_order_ids)
+                        for order in batch:
+                            oid = int(order["order_id"])
+                            self.fresh[oid] = order
+                            if (oid not in rows or not rows[oid].get("order_readback_complete")) and oid not in self.excluded and any(self.product_matches(p) for p in order.get("products", [])):
+                                source = self.live_reference(order)
+                                if self.tracking and not source:
+                                    # Comparison still records other units of this product, with a clear warning.
+                                    requested_tracking, self.tracking = self.tracking, ""
+                                    try:
+                                        row = self.candidate(order, returned=return_bindings.get(oid))
+                                    finally:
+                                        self.tracking = requested_tracking
+                                    if row:
+                                        row["tracking_reference_pending"] = True
+                                    consider(row)
+                                else:
+                                    consider(self.candidate(order, evidence=f"tracking:{source}" if source and self.tracking else "",
+                                                            returned=return_bindings.get(oid)))
+                        self.cache.remember_batch([(self.sanitize(o, names.get(int(o.get("order_status_id") or 0), "")),
+                                                  extract_references(o, self.definitions)) for o in batch])
+                self.comparison_complete = comparison_ok
+                if not comparison_ok:
+                    self.exceptions.append("current_api_comparison_incomplete_requires_followup")
+            except RuntimeError:
+                self.exceptions.append("current_api_comparison_incomplete_requires_followup")
+            finally:
+                self.preview_only = original_preview
+        if best and not original_preview and not best.get("financial_enrichment_complete") and best.get("order_readback_complete"):
+            tracking, self.tracking = self.tracking, "" if best.get("tracking_reference_pending") else self.tracking
+            try:
+                enriched = self.candidate(self.fresh[best["order_id"]], evidence=best["evidence"],
+                                          returned=return_bindings.get(best["order_id"]))
+                if enriched:
+                    best = rows[best["order_id"]] = {**enriched, **({"tracking_reference_pending": True} if best.get("tracking_reference_pending") else {})}
+            except RuntimeError:
+                self.exceptions.append("best_candidate_enrichment_requires_followup")
+            finally:
+                self.tracking = tracking
+        result = self.result(best)
+        result["candidates"] = sorted(rows.values(), key=candidate_rank, reverse=True)
+        result["scope"]["mode"] = "progressive_comparison"
+        result["scope"]["stopped_after_first"] = False
+        result["scope"]["current_api_comparison_complete"] = self.comparison_complete
+        result["scope"]["comparison_scope"] = "all_current_statuses" if self.deep else "return_cancel_service_statuses_and_native_returns"
+        return result
+
     def result(self, row: dict | None) -> dict:
         return {
             "created_at": datetime.now(UTC).isoformat(), "model": self.model, "original_ean": self.ean,
             "catalog": list(self.catalog.values()), "candidates": [row] if row else [],
-            "best_candidate": row["order_id"] if row else None, "best_candidate_basis": "first_fresh_plausible_candidate",
+            "best_candidate": row["order_id"] if row else None, "best_candidate_basis": "strongest_observed_evidence_so_far",
             "unit_identity_confirmed": False, "intake_authorized": False,
             "scope": {"mode": "first_candidate", "includes_archive": False, "cache_used": self.cache_used,
                       "stopped_after_first": bool(row), "global_ranking_complete": False,
                       "orders_indexed": self.orders_seen, "status_count": len(self.status_names),
                       "api_calls": self.calls, "api_calls_to_first_candidate": self.first_calls,
-                      "candidate_enrichment_complete": self.enrichment_complete,
+                      "candidate_enrichment_complete": bool(row and row.get("financial_enrichment_complete")),
+                      "return_reference_policy": "advisory" if self.advisory_returns else "explicit_reference_lookup",
+                      "followup_required": ["compare_other_current_orders", "archive"] if not self.comparison_complete else ["archive"],
                       "time_to_first_candidate_seconds": round(self.first_at, 3) if self.first_at is not None else None,
                       "elapsed_seconds": round(time.monotonic() - self.started, 3), "steps": self.scope_steps,
                       "specified_order_ids": self.order_ids, "requested_ids_not_in_current_api": self.requested_missing,

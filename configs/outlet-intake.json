@@ -137,10 +137,10 @@
     "approval_for_sheet_entry_includes_PZ": false,
     "private_queue": true
   },
-  "engine_version": "2.1.0",
+  "engine_version": "2.2.0",
   "fast_search": {
-    "default_mode": "first_fresh_plausible_candidate",
-    "obvious_label_identifiers_first": true,
+    "default_mode": "progressive_best_so_far",
+    "obvious_label_identifiers_first": false,
     "scan_return_number_in_order_notes": true,
     "standard_note_field_ids": [
       "2"
@@ -148,10 +148,22 @@
     "emit_first_candidate_before_enrichment": true,
     "conversation_first_call_preview_only": true,
     "full_scan_opt_in": true,
-    "known_reference_cannot_fall_back_to_model_only": true,
     "api_request_limit_per_minute": 100,
     "status_metadata_max_age_seconds": 3600,
     "field_metadata_max_age_seconds": 86400,
-    "production_reference_index_in_git": false
+    "production_reference_index_in_git": false,
+    "return_reference_policy": "advisory_when_product_known",
+    "return_codes_may_be_mistyped": true,
+    "return_code_match_is_ranking_bonus": false,
+    "independent_reads_may_run_in_parallel": true,
+    "continue_after_early_proposal": true,
+    "archive_followup_required": true,
+    "return_code_mismatch_does_not_block_product_candidate": true,
+    "conversation_transition": {
+      "human_interrupt_or_next_product_confirms_last_shown_binding": true,
+      "technical_cancel_confirms_binding": false,
+      "unshown_candidate_is_accepted": false,
+      "approval_for_exact_sheet_entry_still_required": true
+    }
   }
 }
